@@ -3,13 +3,15 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+
 @TeleOp(name = "X-Drive TeleOp")
 public class MoveRobot extends LinearOpMode {
-
+    public DcMotor  Liikumine   = null;
     // ---- Simple speed presets, replaces an external DriveGear enum ----
     public enum DriveGear {
         LOW(0.4),
@@ -107,7 +109,8 @@ public class MoveRobot extends LinearOpMode {
 
         telemetry.addLine("Ready - press start");
         telemetry.update();
-
+        Liikumine = hardwareMap.get(DcMotor.class, "Motor_Port_0ok2_CH");
+        Liikumine.setDirection(DcMotorSimple.Direction.FORWARD);
         waitForStart();
 
         while (opModeIsActive()) {
@@ -128,6 +131,11 @@ public class MoveRobot extends LinearOpMode {
                     strafe, drive, turn,
                     fieldCentric, currentDriveGear
             );
+            if (gamepad1.square)
+                Liikumine.setPower(1);
+
+            if (gamepad1.circle)
+                Liikumine.setPower(0);
 
             telemetry.addData("Gear", currentDriveGear);
             telemetry.addData("Field Centric", fieldCentric);
