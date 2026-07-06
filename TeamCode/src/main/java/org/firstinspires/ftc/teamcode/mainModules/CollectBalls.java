@@ -60,5 +60,6 @@ public class CollectBalls {
 
         motor.setPower(power);
         motor1.setPower(power);
+        motor2.setPower(power);
     }
 }
