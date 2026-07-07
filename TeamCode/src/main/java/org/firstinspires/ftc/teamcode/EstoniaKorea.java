@@ -32,16 +32,15 @@ d!   'W M@@@A  ][  M@@@A W`   !b
    ====================== */
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.common.util.ImuManager;
-import org.firstinspires.ftc.teamcode.mainModules.ClimbRope;
+import org.firstinspires.ftc.teamcode.mainModules.ClimbPole;
 import org.firstinspires.ftc.teamcode.mainModules.MoveRobot;
 import org.firstinspires.ftc.teamcode.common.util.Presses;
 import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
-import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 import org.firstinspires.ftc.teamcode.mainModules.RaiseFlag;
+import org.firstinspires.ftc.teamcode.mainModules.ShootBalls;
+import org.firstinspires.ftc.teamcode.mainModules.SpinWheel;
 
 import org.firstinspires.ftc.teamcode.common.util.DriveBaseController;
 import static org.firstinspires.ftc.teamcode.mainModules.MoveRobotTank.DriveGear;
@@ -56,11 +55,24 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
        Fields / State
        ====================== */
     int climbingDirection = 0; // 0 - stop, 1 - stay on rope, 2 - up, -1 - down, 3 - joystick
-    RaiseFlag raiseFlag = null;
+    
+    // Subsystem instances
+    private RaiseFlag raiseFlag = null;
+    private ClimbPole climbRope = null;
+    private CollectBalls collectBalls = null;
+    private ShootBalls shootBalls = null;
+    private SpinWheel spinWheel = null;
+    private DriveBaseController driveBase;
+
+    // Attachment flags
+    private boolean ropeClimbingAttached = false;
+    private boolean raiseFlagAttached = false;
+    private boolean collectBallsAttached = false;
+    private boolean shootBallsAttached = false;
+    private boolean spinWheelAttached = false;
 
     int[] lastDriveMotorPositions = {0, 0, 0, 0};
-    boolean isSpinningWheel = false;
-    boolean raiseFlagAttached = false;
+    private boolean isSpinningWheel = false;
 
     // Robot geometry / encoder constants
     private static final double TICKS_PER_REV = 560.0; // TICKS_PER_REV: encoder ticks per motor revolution
@@ -73,8 +85,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
     int gear = 1;
 
-    DriveBaseController driveBase;
-
     int collectingDirection = 0;
     /* ======================
        Main opmode loop
@@ -86,21 +96,13 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         // --- Drive base init ---
         driveBase = new MoveRobot(protect, hardwareMap, telemetry, true);
 
-        // --- subsystem placeholders (may remain null if hardware absent) ---
-        ClimbRope climbRope = null;
-        boolean ropeClimbingAttached = false; // leave at false, it detects automatically
-        RaiseFlag raiseFlag = null;
-        boolean raiseFlagAttached = false;  // leave at false, it detects automatically
-        CollectBalls collectBalls = null;
-        boolean collectBallsAttached = false; // leave at false, it detects automatically
-
         // --- Core managers & modules initialization ---
         ImuManager imuManager = new ImuManager(protect, hardwareMap, telemetry, true);
 
         // --- Try to attach optional modules (safe to fail) ---
 
         try {
-            climbRope = new ClimbRope(protect, hardwareMap, telemetry);
+            climbRope = new ClimbPole(protect, hardwareMap, telemetry);
             ropeClimbingAttached = true;
         } catch (Exception e) {
             telemetry.log().add("ClimbRope hardware not found — rope climb disabled");
@@ -110,7 +112,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             raiseFlag = new RaiseFlag(hardwareMap, telemetry);
             raiseFlagAttached = true;
         } catch (Exception e) {
-            telemetry.log().add("ClimbRope hardware not found — rope climb disabled");
+            telemetry.log().add("RaiseFlag hardware not found — flag raising disabled");
         }
 
         try {
@@ -118,6 +120,20 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             collectBallsAttached = true;
         } catch (Exception e) {
             telemetry.log().add("Collecting balls hardware not found — collecting balls disabled");
+        }
+
+        try {
+            shootBalls = new ShootBalls(protect, hardwareMap, telemetry);
+            shootBallsAttached = true;
+        } catch (Exception e) {
+            telemetry.log().add("ShootBalls hardware not found — shooting balls disabled");
+        }
+
+        try {
+            spinWheel = new SpinWheel(protect, hardwareMap, telemetry);
+            spinWheelAttached = true;
+        } catch (Exception e) {
+            telemetry.log().add("SpinWheel hardware not found — spinning wheel disabled");
         }
 
          /* ======================
@@ -166,6 +182,12 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
         // Controls for flag raising
         Presses gamepad2_share = new Presses();
+
+        // Controls for shooting balls
+        Presses gamepad2_circle = new Presses();
+
+        // Controls for spinning wheel
+        Presses gamepad2_square = new Presses();
 
         // Controls for fieldcentric toggle and gyro reset
         Presses gamepad1_share = new Presses();
@@ -245,6 +267,28 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             }
 
 
+            // SHOOTING BALLS
+            boolean isShooting = gamepad2_circle.toggle(gamepad2.circle);
+            if (shootBallsAttached) {
+                if (isShooting) {
+                    shootBalls.start();
+                } else {
+                    shootBalls.stop();
+                }
+            }
+
+
+            // SPIN WHEEL
+            isSpinningWheel = gamepad2_square.toggle(gamepad2.square);
+            if (spinWheelAttached) {
+                if (isSpinningWheel) {
+                    spinWheel.spin(true);
+                } else {
+                    spinWheel.stop();
+                }
+            }
+
+
             // FLAG RAISING
             boolean needFlagRaised = gamepad2_share.toggle(gamepad2.share);
             if (needFlagRaised && !isFlagRaised && raiseFlagAttached) {
@@ -300,4 +344,4 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         return ticks * (WHEEL_CIRCUMFERENCE / TICKS_PER_REV);
     }
 
-} // This brace correctly closes the `EstoniaPanama` class.
+} // This brace correctly closes the `EstoniaKorea` class.

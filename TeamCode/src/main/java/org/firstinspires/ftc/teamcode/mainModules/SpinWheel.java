@@ -12,8 +12,10 @@ public class SpinWheel {
     private DcMotorEx wheelMotor;
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
+    private final boolean protect;
 
-    public SpinWheel(HardwareMap hardwareMap, Telemetry telemetry) {
+    public SpinWheel(boolean protect, HardwareMap hardwareMap, Telemetry telemetry) {
+        this.protect = protect;
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
         mapMotor();

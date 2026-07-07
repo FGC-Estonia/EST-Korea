@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
 
-public class ClimbRope {
+public class ClimbPole {
     private DcMotorEx climbMotor = null;
     private Servo leftMoveServo;
     private Servo rightMoveServo;
@@ -31,7 +31,7 @@ public class ClimbRope {
     private static final double TOTAL_GEAR_RATIO = GEAR_RATIO_1 * GEAR_RATIO_2 * GEAR_RATIO_3;
     private static final int TICKS_PER_OUTPUT_SHAFT_REVOLUTION = (int) (REV_HD_HEX_MOTOR_TICKS_PER_MOTOR_REV * TOTAL_GEAR_RATIO);
 
-    public ClimbRope(boolean protect, HardwareMap hardwareMap, Telemetry telemetry) {
+    public ClimbPole(boolean protect, HardwareMap hardwareMap, Telemetry telemetry) {
         this.protect = protect;
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
