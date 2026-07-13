@@ -39,8 +39,7 @@ import org.firstinspires.ftc.teamcode.mainModules.MoveRobot;
 import org.firstinspires.ftc.teamcode.common.util.Presses;
 import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
 import org.firstinspires.ftc.teamcode.mainModules.RaiseFlag;
-import org.firstinspires.ftc.teamcode.mainModules.ShootBalls;
-import org.firstinspires.ftc.teamcode.mainModules.SpinWheel;
+import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 
 import org.firstinspires.ftc.teamcode.common.util.DriveBaseController;
 import static org.firstinspires.ftc.teamcode.mainModules.MoveRobotTank.DriveGear;
@@ -55,13 +54,12 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
        Fields / State
        ====================== */
     int climbingDirection = 0; // 0 - stop, 1 - stay on rope, 2 - up, -1 - down, 3 - joystick
-    
+
     // Subsystem instances
     private RaiseFlag raiseFlag = null;
     private ClimbPole climbRope = null;
     private CollectBalls collectBalls = null;
-    private ShootBalls shootBalls = null;
-    private SpinWheel spinWheel = null;
+    private ThrowBalls ThrowBalls = null;
     private DriveBaseController driveBase;
 
     // Attachment flags
@@ -123,14 +121,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         }
 
         try {
-            shootBalls = new ShootBalls(protect, hardwareMap, telemetry);
-            shootBallsAttached = true;
-        } catch (Exception e) {
-            telemetry.log().add("ShootBalls hardware not found — shooting balls disabled");
-        }
-
-        try {
-            spinWheel = new SpinWheel(protect, hardwareMap, telemetry);
+            ThrowBalls= new ThrowBalls(protect, hardwareMap, telemetry);
             spinWheelAttached = true;
         } catch (Exception e) {
             telemetry.log().add("SpinWheel hardware not found — spinning wheel disabled");
@@ -267,24 +258,13 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             }
 
 
-            // SHOOTING BALLS
-            boolean isShooting = gamepad2_circle.toggle(gamepad2.circle);
-            if (shootBallsAttached) {
-                if (isShooting) {
-                    shootBalls.start();
-                } else {
-                    shootBalls.stop();
-                }
-            }
-
-
-            // SPIN WHEEL
+            // Throw balls
             isSpinningWheel = gamepad2_square.toggle(gamepad2.square);
             if (spinWheelAttached) {
                 if (isSpinningWheel) {
-                    spinWheel.spin(true);
+                    ThrowBalls.spin(true);
                 } else {
-                    spinWheel.stop();
+                    ThrowBalls.stop();
                 }
             }
 
