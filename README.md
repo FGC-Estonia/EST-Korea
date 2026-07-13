@@ -1,3 +1,6 @@
+# FGC 2026 Korea — Team Estonia Robot Code 🇪🇪
+
+Welcome to the official repository of **FGC Team Estonia** for the **FIRST Global Challenge 2026** in **Korea**. This project contains the robot control code developed using Android Studio and the FTC SDK base (`RobotController`). All Estonia-specific code is located in the `TeamCode` module.
 ## NOTICE
 
 This repository contains the public FTC SDK for the DECODE (2025-2026) competition season.
