@@ -3,17 +3,16 @@ package org.firstinspires.ftc.teamcode.mainModules;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
 
+/**
+ * Module for controlling the robot's pole climbing mechanism.
+ * Uses a single DC motor to pull the robot up or lower it down.
+ */
 public class ClimbPole {
     private DcMotorEx climbMotor = null;
-    private Servo leftMoveServo;
-    private Servo rightMoveServo;
-    private TouchSensor magneticLimitSwitch;
     private final boolean protect;
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
@@ -39,27 +38,6 @@ public class ClimbPole {
     }
 
     private void mapMotors() {
-        try {
-            leftMoveServo = hardwareMap.get(Servo.class, "Servo_Port_5_CH");
-            leftMoveServo.setDirection(Servo.Direction.REVERSE);
-        } catch (Exception e) {
-            leftMoveServo = null;
-        }
-
-        try {
-            rightMoveServo = hardwareMap.get(Servo.class, "Servo_Port_4_CH");
-            rightMoveServo.setDirection(Servo.Direction.FORWARD);
-        } catch (Exception e) {
-            rightMoveServo = null;
-        }
-
-        try {
-            magneticLimitSwitch = hardwareMap.get(TouchSensor.class, "Digital_Port_1_CH");
-        } catch (Exception e) {
-            magneticLimitSwitch = null;
-        }
-
-
         climbMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.ROPE_MOTOR);
 
         climbMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -84,8 +62,6 @@ public class ClimbPole {
         int deltaAngle = storedHomePositionTicks - currentAngularOffset;
 
         // Adjust deltaAngle for the shortest path around the circle
-        // Example: If current is 270 degrees and target is 10 degrees, moving +100 degrees
-        // is shorter than -260 degrees.
         if (deltaAngle > TICKS_PER_OUTPUT_SHAFT_REVOLUTION / 2) {
             deltaAngle -= TICKS_PER_OUTPUT_SHAFT_REVOLUTION;
         } else if (deltaAngle < -TICKS_PER_OUTPUT_SHAFT_REVOLUTION / 2) {
@@ -105,13 +81,11 @@ public class ClimbPole {
         climbMotor.setTargetPosition(targetTicks);
 
         // This power (from 0.0 to 1.0) acts as the maximum speed the motors will use
-        // to try and reach their target. The controller will vary the power to slow down
-        // as it approaches the target.
         climbMotor.setPower(1.0); // Full power for movement
 
         // Wait until the motors reach their target or a timeout occurs.
         long startTime = System.currentTimeMillis();
-        long timeoutMillis = 10000; // 10 seconds timeout. Adjust this value based on your mechanism's speed and travel distance.
+        long timeoutMillis = 10000; // 10 seconds timeout.
 
         // Loop while the OpMode is active, at least one motor is still moving, AND the timeout hasn't been reached.
         while ((climbMotor.isBusy()) && (System.currentTimeMillis() - startTime < timeoutMillis)) {
@@ -134,8 +108,13 @@ public class ClimbPole {
     return storedHomePositionTicks;
     }
 
+    /**
+      Controls the climbing motor based on the given direction and joystick input.
+     * 
+     * @param direction 0: stop, 1: hold position, 2: up, -1: down, 3: joystick control
+     * @param stick Manual joystick power adjustment
+     */
     public void ropeClimbing(int direction, float stick) {
-        double thingy = 0.6;
         if (resettingPosition) {return;}
 
         double power;
@@ -144,108 +123,15 @@ public class ClimbPole {
             power = 1.0;
         } else if (direction == -1) {  // Climb down slowly
             power = -CLIMB_DOWN_RATE;
-        } else if (direction == 1) {
+        } else if (direction == 1) { // Stay on rope
             power = STAY_ON_RATE;
-        } else if (direction == 3) {
+        } else if (direction == 3) { // Joystick control
             power = (stick + 1) * 0.6 - 0.2;
         } else {
             power = 0;
         }
 
         climbMotor.setPower(power);
-    }
-
-    public void slide(boolean open) {
-        if (leftMoveServo == null || rightMoveServo == null) {
-            telemetry.addData("Slide", "Servos not mapped - abort");
-            telemetry.update();
-            try {
-                Thread.sleep(600);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-            }
-            return;
-        }
-
-
-
-        if (open) {
-            telemetry.addData("Slide", "Opening...");
-            telemetry.addData("magnet isPressed:", magneticLimitSwitch.isPressed());
-            telemetry.update();
-
-            // extend
-            leftMoveServo.setPosition(1.0);
-            rightMoveServo.setPosition(1.0);
-
-            // Wait until magnetic limit switch detects magnet (active-low => getState()==false)
-            final long timeoutMs = 5000; // 3 seconds max
-            long start = System.currentTimeMillis();
-            boolean detected = false;
-
-            if (magneticLimitSwitch != null) {
-                while (System.currentTimeMillis() - start < timeoutMs) {
-                    // active-low sensor: false means magnet present / limit reached
-                    try {
-                        if (magneticLimitSwitch.isPressed()) {
-                            detected = true;
-                            break;
-                        }
-                    } catch (Exception e) {
-                        // sensor read failed; bail to timeout
-                        break;
-                    }
-                    try {
-                        Thread.sleep(20);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        break;
-                    }
-                }
-            } else {
-                // No limit switch: wait a conservative default time
-                try {
-                    Thread.sleep(600);
-                    detected = true; // assume done after time
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-
-            telemetry.addData("Slide", detected ? "Limit reached" : "Timeout");
-            telemetry.update();
-
-            // set to hold position
-            leftMoveServo.setPosition(0.5);
-            rightMoveServo.setPosition(0.5);
-        } else {
-            telemetry.addData("Slide", "Closing...");
-            telemetry.update();
-
-            // retract
-            leftMoveServo.setPosition(0.0);
-            rightMoveServo.setPosition(0.0);
-
-            // wait fixed 2000 ms for retract travel
-            try {
-                Thread.sleep(4000);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-            }
-
-            // set to hold position
-            leftMoveServo.setPosition(0.5);
-            rightMoveServo.setPosition(0.5);
-
-            telemetry.addData("Slide", "Closed - holding");
-            telemetry.update();
-        }
-    }
-
-    public void showDigPort() {
-        if (magneticLimitSwitch == null) {telemetry.addData("not mapped magnet", ""); return;}
-        telemetry.addData("magnet sensor:", magneticLimitSwitch.getValue());
-        telemetry.addData("magnet isPressed:", magneticLimitSwitch.isPressed());
     }
 
 }

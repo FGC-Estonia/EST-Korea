@@ -19,8 +19,8 @@ public class HardwareConstants {
     public static final String FLAG_SERVO_MOTOR = "Servo_Port_0_CH";
     public static final String BALL_PUSHER_MOTOR_LEFT = "Servo_Port_2_CH";
     public static final String BALL_PUSHER_MOTOR_RIGHT = "Servo_Port_1_CH";
-    public static final String BALL_COLLECTOR_MOTOR_1 = "Motor_Port_2_EH";
-    public static final String BALL_COLLECTOR_MOTOR_2 = "Motor_Port_3_EH";
+    public static final String BALL_COLLECTOR_MOTOR = "Motor_Port_2_EH";
+    public static final String FEEDER_MOTOR = "Motor_Port_3_EH";
 
 
 

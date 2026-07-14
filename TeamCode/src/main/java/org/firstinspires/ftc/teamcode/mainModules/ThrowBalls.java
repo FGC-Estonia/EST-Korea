@@ -6,6 +6,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
 
+/**
+ * Module for launching balls toward the goal.
+ */
 public class ThrowBalls {
 
     private DcMotorEx wheelMotor;
@@ -13,6 +16,9 @@ public class ThrowBalls {
     private final Telemetry telemetry;
     private final boolean protect;
 
+    /**
+     * Initializes the launcher module.
+     */
     public ThrowBalls(boolean protect, HardwareMap hardwareMap, Telemetry telemetry) {
         this.protect = protect;
         this.hardwareMap = hardwareMap;
@@ -25,15 +31,20 @@ public class ThrowBalls {
         wheelMotor.setDirection(DcMotorEx.Direction.FORWARD);
     }
 
+    /**
+     * Spins the launcher wheel.
+     * 
+     * @param Spinning True to spin at full power, false to stop.
+     */
     public void spin(boolean Spinning) {
-        if (Spinning) {
-            wheelMotor.setPower(1); // example max position (adjust as needed)
+        if (Spinning) {// Inside the while loop
+            wheelMotor.setPower(1); // Maximum power when activated
         } else {
-            wheelMotor.setPower(0); // example min position (adjust as needed)
+            wheelMotor.setPower(0); // No power for using flywheel intertia
         }
     }
 
     public void stop() {
-        wheelMotor.setVelocity(0);
+        wheelMotor.setPower(0);
     }
 }

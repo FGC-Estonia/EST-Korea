@@ -38,6 +38,7 @@ import org.firstinspires.ftc.teamcode.mainModules.ClimbPole;
 import org.firstinspires.ftc.teamcode.mainModules.MoveRobot;
 import org.firstinspires.ftc.teamcode.common.util.Presses;
 import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
+import org.firstinspires.ftc.teamcode.mainModules.FeedBalls;
 import org.firstinspires.ftc.teamcode.mainModules.RaiseFlag;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 
@@ -55,17 +56,19 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
        ====================== */
     int climbingDirection = 0; // 0 - stop, 1 - stay on rope, 2 - up, -1 - down, 3 - joystick
 
-    // Subsystem instances
-    private RaiseFlag raiseFlag = null;
-    private ClimbPole climbRope = null;
-    private CollectBalls collectBalls = null;
-    private ThrowBalls ThrowBalls = null;
-    private DriveBaseController driveBase;
+    // --- Subsystem instances for robot modules ---
+    private RaiseFlag raiseFlag = null;      // Flag raising mechanism
+    private ClimbPole climbRope = null;      // Pole climbing mechanism
+    private CollectBalls collectBalls = null; // Ball intake mechanism
+    private FeedBalls feedBalls = null;       // Ball feeding mechanism
+    private ThrowBalls throwBalls = null;     // Ball launcher mechanism
+    private DriveBaseController driveBase;    // Robot drivetrain control logic
 
     // Attachment flags
     private boolean ropeClimbingAttached = false;
     private boolean raiseFlagAttached = false;
     private boolean collectBallsAttached = false;
+    private boolean feedBallsAttached = false;
     private boolean shootBallsAttached = false;
     private boolean spinWheelAttached = false;
 
@@ -121,7 +124,14 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         }
 
         try {
-            ThrowBalls= new ThrowBalls(protect, hardwareMap, telemetry);
+            feedBalls = new FeedBalls(protect, hardwareMap, telemetry);
+            feedBallsAttached = true;
+        } catch (Exception e) {
+            telemetry.log().add("Feeder hardware not found — feeding balls disabled");
+        }
+
+        try {
+            throwBalls= new ThrowBalls(protect, hardwareMap, telemetry);
             spinWheelAttached = true;
         } catch (Exception e) {
             telemetry.log().add("SpinWheel hardware not found — spinning wheel disabled");
@@ -161,12 +171,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         Presses gamepad2_dpad_left = new Presses();
         Presses gamepad2_dpad_right = new Presses();
 
-
-
-        // Controls for collecting balls:
-        // > gamepad2.right_trigger   - suck balls in
-        // > gamepad2.left_trigger    - let balls out
-
+        
         // Controls for drive gear
         Presses gamepad1_right_bumper = new Presses();
         Presses gamepad1_left_bumper = new Presses();
@@ -174,10 +179,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         // Controls for flag raising
         Presses gamepad2_share = new Presses();
 
-        // Controls for shooting balls
+
         Presses gamepad2_circle = new Presses();
 
-        // Controls for spinning wheel
+        // Controls for Throwing balls
         Presses gamepad2_square = new Presses();
 
         // Controls for fieldcentric toggle and gyro reset
@@ -214,7 +219,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             }
 
 
-            // ROPE CLIMBING
+            // --- POLE CLIMBING LOGIC ---
+            // Handles logic for holding, climbing up/down, or manual joystick control
             boolean holdingOnRope = gamepad2_triangle.toggle(gamepad2.triangle);
 
             if (holdingOnRope) {
@@ -243,7 +249,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             }
 
 
-            // COLLECTING BALLS
+            // --- COLLECTING BALLS LOGIC ---
+            // Triggers control sucking in or letting out balls
             if (gamepad2.right_trigger > 0) {
                 collectingDirection = 1;  // suck inj
             } else if (gamepad2.left_trigger > 0) {
@@ -258,18 +265,32 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             }
 
 
-            // Throw balls
-            isSpinningWheel = gamepad2_square.toggle(gamepad2.square);
-            if (spinWheelAttached) {
-                if (isSpinningWheel) {
-                    ThrowBalls.spin(true);
+            // --- FEED BALLS LOGIC ---
+            // Toggles the feeder mechanism to move balls to the launcher
+            boolean isFeeding = gamepad2_cross.toggle(gamepad2.cross);
+            if (feedBallsAttached) {
+                if (isFeeding) {
+                    feedBalls.feed(true);
                 } else {
-                    ThrowBalls.stop();
+                    feedBalls.stop();
                 }
             }
 
 
-            // FLAG RAISING
+            // --- THROW BALLS LOGIC ---
+            // Toggles the spinning launcher wheel
+            isSpinningWheel = gamepad2_square.toggle(gamepad2.square);
+            if (spinWheelAttached) {
+                if (isSpinningWheel) {
+                    throwBalls.spin(true);
+                } else {
+                    throwBalls.stop();
+                }
+            }
+
+
+            // --- FLAG RAISING LOGIC ---
+            // Deploys the flag
             boolean needFlagRaised = gamepad2_share.toggle(gamepad2.share);
             if (needFlagRaised && !isFlagRaised && raiseFlagAttached) {
                 raiseFlag.setPos(1);

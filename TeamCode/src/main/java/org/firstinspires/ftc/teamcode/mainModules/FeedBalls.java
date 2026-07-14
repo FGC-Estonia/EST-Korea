@@ -8,20 +8,18 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
 
 /**
- * Module for intake and collection of balls.
- * Uses a motor to suck balls into the robot or push them out - not used
+ * Module for feeding collected balls into the launcher.
  */
-public class CollectBalls {
+public class FeedBalls {
     private DcMotorEx motor = null;
     private final boolean protect;
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
-    private final double LET_BALLS_OUT_RATE = 1.0;
 
     /**
-     * Initializes the collection module.
+     * Initializes the feeder module.
      */
-    public CollectBalls(boolean protect, HardwareMap hardwareMap, Telemetry telemetry) {
+    public FeedBalls(boolean protect, HardwareMap hardwareMap, Telemetry telemetry) {
         this.protect = protect;
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
@@ -29,28 +27,27 @@ public class CollectBalls {
     }
 
     private void mapMotors() {
-        motor = hardwareMap.get(DcMotorEx.class, HardwareConstants.BALL_COLLECTOR_MOTOR);
+        motor = hardwareMap.get(DcMotorEx.class, HardwareConstants.FEEDER_MOTOR);
 
         motor.setDirection(DcMotor.Direction.FORWARD);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     /**
-     * Sets the collector motor power based on the desired direction.
+     * Activates or deactivates the feeding motor.
      * 
-     * @param direction 1: suck in, -1: let out, 0: stop
+     * @param active True to feed balls, false to stop.
      */
-    public void collectingBalls(int direction) {
-        double power;
-
-        if (direction == 1) {  // Suck in
-            power = 1.0;
-        } else if (direction == -1) {  // Let out
-            power = -LET_BALLS_OUT_RATE;
+    public void feed(boolean active) {
+        if (active) {
+            motor.setPower(1.0);
         } else {
-            power = 0;
+            motor.setPower(0);
         }
+    }
 
-        motor.setPower(power);
+    public void stop() {
+        motor.setPower(0);
     }
 }
