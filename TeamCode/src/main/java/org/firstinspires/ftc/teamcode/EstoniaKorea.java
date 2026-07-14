@@ -138,28 +138,22 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
          /* ======================
            Controls: Presses wrappers and toggles
-           (grouped and annotated for readability — no logic changed)
            ====================== */
 
         // Unused controls reserved for future use
         Presses gamepad1_left_trigger = new Presses();
         Presses gamepad1_right_trigger = new Presses();
-        Presses gamepad2_cross = new Presses();
+
         Presses gamepad1_dpad_left = new Presses();
         Presses gamepad1_dpad_right = new Presses();
         Presses gamepad1_dpad_up = new Presses();
-        Presses gamepad1_dpad_down = new Presses();
         Presses gamepad2_dpad_up = new Presses();
-        Presses gamepad2_dpad_down = new Presses();
+
         Presses gamepad2_left_bumper = new Presses();
         // Drive speed toggle group (replaced by drivegear)
-        Presses.ToggleGroup speedSelectToggle = new Presses.ToggleGroup();
-        Presses gamepad1_square = new Presses(speedSelectToggle);
-        Presses gamepad1_triangle = new Presses(speedSelectToggle);
-        Presses gamepad1_circle = new Presses(speedSelectToggle);
-        Presses gamepad1_cross = new Presses(speedSelectToggle);
-        gamepad1_triangle.setToggleTrue();//set default value
-
+        Presses.ToggleGroup feedClearToggle = new Presses.ToggleGroup();
+        Presses gamepad2_cross = new Presses(feedClearToggle);
+        Presses gamepad2_dpad_down = new Presses(feedClearToggle);
         // Controls for rope climbing
         Presses gamepad2_triangle = new Presses();
         // Also using:
@@ -201,8 +195,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             //move robot
             double imuAngle = imuManager.getYawRadians();
             double imuPitch = imuManager.getPitchRadians();
-            double drive = -gamepad1.left_stick_x;
-            double strafe = gamepad1.left_stick_y;
+            double drive = -gamepad1.left_stick_y;
+            double strafe = gamepad1.left_stick_x;
             double turn = -gamepad1.right_stick_x;
 
             // FieldCentric rumble
@@ -267,14 +261,18 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // --- FEED BALLS LOGIC ---
             // Toggles the feeder mechanism to move balls to the launcher
             boolean isFeeding = gamepad2_cross.toggle(gamepad2.cross);
+            boolean isClearing = gamepad2_dpad_down.toggle(gamepad2.dpad_down);
+            telemetry.addData("isFeeding", isFeeding);
+            telemetry.addData("isClearing", isClearing);
             if (feedBallsAttached) {
                 if (isFeeding) {
                     feedBalls.feed(true);
+                } else if (isClearing){
+                    feedBalls.clear(true);
                 } else {
                     feedBalls.stop();
                 }
             }
-
 
             // --- THROW BALLS LOGIC ---
             // Toggles the spinning launcher wheel
@@ -285,6 +283,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 } else {
                     throwBalls.stop();
                 }
+            }
+            if (throwBalls.throwSpeed() > 1700) {
+                gamepad2.rumble(250);
             }
 
 

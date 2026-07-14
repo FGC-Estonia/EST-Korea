@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.mainModules;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -29,7 +30,7 @@ public class ThrowBalls {
 
     private void mapMotor() {
         wheelMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.WHEEL_MOTOR);
-        wheelMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        wheelMotor.setDirection(DcMotorEx.Direction.REVERSE);
     }
 
     /**
@@ -39,12 +40,15 @@ public class ThrowBalls {
      */
     public void spin(boolean Spinning) {
         if (Spinning) {// Inside the while loop
-            wheelMotor.setVelocity(100*Math.PI/3, AngleUnit.RADIANS);; // Maximum power when activated
+            wheelMotor.setVelocity(1972.92, AngleUnit.RADIANS);; // Maximum rpm when activated
         } else {
             wheelMotor.setVelocity(0); // No power for using flywheel intertia
         }
     }
 
+    public double throwSpeed() {
+        return wheelMotor.getVelocity();
+    }
     public void stop() {
         wheelMotor.setVelocity(0);
     }

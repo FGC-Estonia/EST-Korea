@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.mainModules;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -29,7 +30,7 @@ public class FeedBalls {
     private void mapMotors() {
         motor = hardwareMap.get(DcMotorEx.class, HardwareConstants.FEEDER_MOTOR);
 
-        motor.setDirection(DcMotor.Direction.FORWARD);
+        motor.setDirection(DcMotor.Direction.REVERSE);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
@@ -40,6 +41,13 @@ public class FeedBalls {
      * @param active True to feed balls, false to stop.
      */
     public void feed(boolean active) {
+        if (active) {
+            motor.setPower(1.0);
+        } else {
+            motor.setPower(0);
+        }
+    }
+    public void clear(boolean active) {
         if (active) {
             motor.setPower(-1.0);
         } else {
