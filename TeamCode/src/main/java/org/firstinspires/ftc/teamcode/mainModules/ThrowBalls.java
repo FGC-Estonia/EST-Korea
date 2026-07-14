@@ -40,9 +40,9 @@ public class ThrowBalls {
      */
     public void spin(boolean Spinning) {
         if (Spinning) {// Inside the while loop
-            wheelMotor.setVelocity(1972.92, AngleUnit.RADIANS);; // Maximum rpm when activated
+            wheelMotor.setVelocity(1900);; // Maximum rpm when activated
         } else {
-            wheelMotor.setVelocity(0); // No power for using flywheel intertia
+            wheelMotor.setVelocity(0); // No power for using flywheel inertia
         }
     }
 

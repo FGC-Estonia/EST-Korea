@@ -195,9 +195,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             //move robot
             double imuAngle = imuManager.getYawRadians();
             double imuPitch = imuManager.getPitchRadians();
-            double drive = -gamepad1.left_stick_y;
+            double drive = gamepad1.left_stick_y;
             double strafe = gamepad1.left_stick_x;
-            double turn = -gamepad1.right_stick_x;
+            double turn = gamepad1.right_stick_x;
 
             // FieldCentric rumble
             if (gamepad1_share.pressed(gamepad1.share)) {
@@ -245,9 +245,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // --- COLLECTING BALLS LOGIC ---
             // Triggers control sucking in or letting out balls
             if (gamepad2.right_trigger > 0) {
-                collectingDirection = 1;  // suck inj
+                collectingDirection = -1;  // suck inj
             } else if (gamepad2.left_trigger > 0) {
-                collectingDirection = -1; // let out
+                collectingDirection = 1; // let out
             } else {
                 collectingDirection = 0;  // hold
             }
@@ -300,6 +300,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 isFlagRaised = false;
             }
 
+            telemetry.addData("Keerutikiirus", throwBalls.throwSpeed());
             telemetry.addData("Field Centric", fieldCentric);
             telemetry.addData("Heading", imuAngle * 180 / 3.14159265358979323);
             /* ======================
@@ -328,10 +329,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.addData("turn", turn);
             driveBase.drive (
                     imuAngle, imuPitch,
-                    drive, strafe, turn,
+                    drive, turn, strafe,
                     fieldCentric, currentDriveGear
             );
-
             telemetry.update();
         } // This brace correctly closes the `while (opModeIsActive())` loop.
     } // This brace correctly closes the `runOpMode()` method.

@@ -55,6 +55,7 @@ public class MoveRobot implements DriveBaseController {
         this.hardwareMap = hardwareMap;
         this.useVelocity = useVelocity;
         mapMotors();
+
     }
 
     private void mapMotors() {
@@ -102,6 +103,7 @@ public class MoveRobot implements DriveBaseController {
                      boolean fieldCentric,
                      DriveGear driveGear
     ) {
+
         this.maxSpeed = driveGear.maxSpeed;
         if (driveGear == DriveGear.HIGH) {
             drive = Math.signum(drive) * Math.pow(Math.abs(drive), 1.8);
@@ -164,6 +166,7 @@ public class MoveRobot implements DriveBaseController {
             leftBackDriveEx.setPower(leftBackPowerRaw / max * maxSpeed);
             rightFrontDriveEx.setPower(rightFrontPowerRaw / max * maxSpeed);
             rightBackDriveEx.setPower(rightBackPowerRaw / max * maxSpeed);
+
         }
 
     }
