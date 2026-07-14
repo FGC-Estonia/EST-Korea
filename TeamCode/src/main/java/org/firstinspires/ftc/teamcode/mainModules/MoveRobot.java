@@ -1,13 +1,11 @@
 package org.firstinspires.ftc.teamcode.mainModules;  //place where the code is located
 
-import static org.firstinspires.ftc.teamcode.mainModules.MoveRobotTank.DriveGear;
-
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import org.firstinspires.ftc.teamcode.common.util.DriveBaseController;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.common.util.DriveBaseController;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
 
 public class MoveRobot implements DriveBaseController {
@@ -27,18 +25,36 @@ public class MoveRobot implements DriveBaseController {
     private final boolean protect;
     double MAX_ANGULAR_VELOCITY_RADIANS = 1972.92;
 
-        double wantedAngle = 0;
+    double wantedAngle = 0;
 
-        double maxSpeed=1;
+    double maxSpeed=1;
 
-        public MoveRobot(boolean protect, HardwareMap hardwareMap, Telemetry telemetry, boolean useVelocity){
+    // Defines the different drive speed gears.
 
-            //Pass required objects and a setting to the class
-            this.protect = protect;
-            this.telemetry = telemetry;
-            this.hardwareMap = hardwareMap;
-            this.useVelocity = useVelocity;
-            mapMotors();
+    public enum DriveGear {
+        LOW(0.35, 0.4, "Low"),
+        MEDIUM(0.6, 0.5, "Medium"),
+        HIGH(1.0, 0.8, "High");
+
+        public final double maxSpeed;
+        public final double turnSpeed; // This 'turnSpeed' from enum seems to be a direct speed cap for turning
+        public final String telemetryName;
+
+        DriveGear(double maxSpeed, double turnSpeed, String telemetryName) {
+            this.maxSpeed = maxSpeed;
+            this.turnSpeed = turnSpeed;
+            this.telemetryName = telemetryName;
+        }
+    }
+
+    public MoveRobot(boolean protect, HardwareMap hardwareMap, Telemetry telemetry, boolean useVelocity){
+
+        //Pass required objects and a setting to the class
+        this.protect = protect;
+        this.telemetry = telemetry;
+        this.hardwareMap = hardwareMap;
+        this.useVelocity = useVelocity;
+        mapMotors();
     }
 
     private void mapMotors() {
@@ -87,8 +103,11 @@ public class MoveRobot implements DriveBaseController {
                      DriveGear driveGear
     ) {
         this.maxSpeed = driveGear.maxSpeed;
-        telemetry.addData("Gear", driveGear.telemetryName);
-
+        if (driveGear == DriveGear.HIGH) {
+            drive = Math.signum(drive) * Math.pow(Math.abs(drive), 1.8);
+            strafe = Math.signum(strafe) * Math.pow(Math.abs(strafe), 1.8);
+            turn = Math.signum(turn) * Math.pow(Math.abs(turn), 1.8);
+        }
         double x;
         double y;
         double turnCompensation;
@@ -169,4 +188,4 @@ public class MoveRobot implements DriveBaseController {
         };
     }
 
-} // Correct closing brace for the `MoveRobot` class.
+}

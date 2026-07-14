@@ -43,8 +43,7 @@ import org.firstinspires.ftc.teamcode.mainModules.RaiseFlag;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 
 import org.firstinspires.ftc.teamcode.common.util.DriveBaseController;
-import static org.firstinspires.ftc.teamcode.mainModules.MoveRobotTank.DriveGear;
-
+import static org.firstinspires.ftc.teamcode.mainModules.MoveRobot.DriveGear;
 /* ======================
    Opmode annotation + class declaration
    ====================== */
@@ -328,7 +327,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.addData("turn", turn);
             driveBase.drive (
                     imuAngle, imuPitch,
-                    strafe, drive, turn,
+                    drive, strafe, turn,
                     fieldCentric, currentDriveGear
             );
 

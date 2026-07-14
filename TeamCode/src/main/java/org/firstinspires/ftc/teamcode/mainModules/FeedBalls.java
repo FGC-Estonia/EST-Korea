@@ -41,7 +41,7 @@ public class FeedBalls {
      */
     public void feed(boolean active) {
         if (active) {
-            motor.setPower(1.0);
+            motor.setPower(-1.0);
         } else {
             motor.setPower(0);
         }
