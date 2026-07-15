@@ -31,10 +31,10 @@ public class ImuManager {
 
                 if (xDrive) {
                     logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
-                    usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+                    usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
                 } else {
                     logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
-                    usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+                    usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
                 }
 
                 RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
@@ -51,7 +51,7 @@ public class ImuManager {
             imu = hardwareMap.get(IMU.class, "imu");
 
             RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
-            RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+            RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
 
             RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
