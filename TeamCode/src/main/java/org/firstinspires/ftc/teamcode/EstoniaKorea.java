@@ -300,7 +300,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 isFlagRaised = false;
             }
 
-            telemetry.addData("Keerutikiirus", throwBalls.throwSpeed());
+            telemetry.addData("ViskeKeerutikiirus", throwBalls.throwSpeed());
             telemetry.addData("Field Centric", fieldCentric);
             telemetry.addData("Heading", imuAngle * 180 / 3.14159265358979323);
             /* ======================
