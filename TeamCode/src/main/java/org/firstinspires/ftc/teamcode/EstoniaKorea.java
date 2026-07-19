@@ -195,7 +195,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             //move robot
             double imuAngle = imuManager.getYawRadians();
             double imuPitch = imuManager.getPitchRadians();
-            double drive = gamepad1.left_stick_y;
+            double drive = -gamepad1.left_stick_y;
             double strafe = gamepad1.left_stick_x;
             double turn = gamepad1.right_stick_x;
 
@@ -327,11 +327,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.addData("drive",drive);
             telemetry.addData("strafe", strafe);
             telemetry.addData("turn", turn);
-            driveBase.drive (
-                    imuAngle, imuPitch,
-                    drive, turn, strafe,
-                    fieldCentric, currentDriveGear
-            );
+            driveBase.drive(imuAngle, imuPitch, drive, strafe, turn, fieldCentric, currentDriveGear);
             telemetry.update();
         } // This brace correctly closes the `while (opModeIsActive())` loop.
     } // This brace correctly closes the `runOpMode()` method.
