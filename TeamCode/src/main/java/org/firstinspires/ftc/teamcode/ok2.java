@@ -29,12 +29,16 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name="Robot: Teleop POV", group="Robot")
 
@@ -46,6 +50,8 @@ public class ok2 extends LinearOpMode {
     public Servo    nuga    = null;
 
     public DcMotor  Turbiin   = null;
+
+    private IMU imu;
 
     public static final double MID_SERVO   =  0.5 ;
     public static final double CLAW_SPEED  = 0.5 ;                 // sets rate to move servo
@@ -68,7 +74,16 @@ public class ok2 extends LinearOpMode {
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         rightDrive.setDirection(DcMotor.Direction.FORWARD);
-        Turbiin.setDirection(DcMotorSimple.Direction.FORWARD);
+        Turbiin.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        imu.initialize(
+                new IMU.Parameters(
+                        new RevHubOrientationOnRobot(
+                                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                        )
+                )
+        );
 
         // If there are encoders connected, switch to RUN_USING_ENCODER mode for greater accuracy
         // leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -78,6 +93,7 @@ public class ok2 extends LinearOpMode {
         nuga  = hardwareMap.get(Servo.class, "Servo_Port_0_CH");
 
         nuga.setPosition(MID_SERVO);
+        imu.resetYaw();
 
 
         // Send telemetry message to signify robot waiting;
@@ -90,10 +106,15 @@ public class ok2 extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
+            double Yaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+
+            if (-0.2 < gamepad1.right_stick_x && 0.2 > gamepad1.right_stick_x) {
+
+            }
             // Run wheels in POV mode (note: The joystick goes negative when pushed forward, so negate it)
             // In this mode the Left stick moves the robot fwd and back, the Right stick turns left and right.
             // This way it's also easy to just drive straight, or just turn.
-            drive = -gamepad1.left_stick_y;
+            drive = gamepad1.left_stick_y;
             turn  = -gamepad1.right_stick_x*0.4;
 
             // Combine drive and turn for blended motion.
