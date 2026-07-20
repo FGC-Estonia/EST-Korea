@@ -32,8 +32,8 @@ public class Alignment {
         return distanceSensor.getDistance(DistanceUnit.MM);
     }
 
-    public double alignTarget() {
-        double error = TARGET - getDistance();
+    public double alignTarget(double currentDistance) {
+        double error = TARGET - currentDistance;
         telemetry.addData("Error", error);
 
         if (Math.abs(error) > TOLERANCE) {

@@ -83,26 +83,24 @@ public class ImuManager {
         }
     }
 
-    public double getYawRadians(){
-        double lastAngle = 0; //if the imu fails in the middle of the game, it will not flick to an angle because the imuManager returned 0, instead it will just stop working safely
-
-        //if the imu has failed it will attempt to restart it.
+    public org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles getAngles() {
         if (imuErrorBoolean) {
-            initImu();
+            // Don't re-init every loop if there is an error, it's too slow.
+            // Just return zeros.
+            return new org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles(AngleUnit.RADIANS, 0, 0, 0, 0);
         }
 
-        if (protect) {
-            try {
-                lastAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-                return lastAngle;
-            } catch (Exception errorIMU) {
-                telemetry.addData("IMU ERROR", errorIMU.getMessage());
-                return lastAngle;
-            }
-        }else {
-            lastAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-            return lastAngle;
+        try {
+            return imu.getRobotYawPitchRollAngles();
+        } catch (Exception e) {
+            imuErrorBoolean = true;
+            telemetry.addData("IMU ERROR", e.getMessage());
+            return new org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles(AngleUnit.RADIANS, 0, 0, 0, 0);
         }
+    }
+
+    public double getYawRadians(){
+        return getAngles().getYaw(AngleUnit.RADIANS);
     }
 
     private double smoothedYaw = 0;
@@ -115,23 +113,6 @@ public class ImuManager {
     }
 
     public double getPitchRadians(){
-        double lastPitch = 0;
-
-        if (imuErrorBoolean) {
-            initImu();
-        }
-
-        if (protect) {
-            try {
-                lastPitch = imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS);
-                return lastPitch;
-            } catch (Exception errorIMU) {
-                telemetry.addData("IMU ERROR (pitch)", errorIMU.getMessage());
-                return lastPitch;
-            }
-        } else {
-            lastPitch = imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS);
-            return lastPitch;
-        }
+        return getAngles().getPitch(AngleUnit.RADIANS);
     }
 }

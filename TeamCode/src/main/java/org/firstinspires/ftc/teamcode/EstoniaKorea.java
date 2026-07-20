@@ -219,11 +219,23 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             }
 
             //move robot
-            double imuAngle = imuManagerAttached ? imuManager.getYawRadians() : 0;
-            double imuPitch = imuManagerAttached ? imuManager.getPitchRadians() : 0;
+            double imuAngle = 0;
+            double imuPitch = 0;
+            if (imuManagerAttached) {
+                com.qualcomm.robotcore.hardware.IMU imu = null; // We don't need the imu object directly
+                org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles angles = imuManager.getAngles();
+                imuAngle = angles.getYaw(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS);
+                imuPitch = angles.getPitch(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS);
+            }
+            
+            double currentDistance = 1000.0;
+            if (alignmentAttached) {
+                currentDistance = alignment.getDistance();
+            }
+
             double drive;
             if (gamepad1.right_trigger > 0.2 && alignmentAttached){
-                drive = -gamepad1.left_stick_y + alignment.alignTarget();
+                drive = -gamepad1.left_stick_y + alignment.alignTarget(currentDistance);
             } else {
                 drive = -gamepad1.left_stick_y;
             }
@@ -309,6 +321,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // Toggles the spinning launcher wheel
             isSpinningWheel = gamepad2_square.toggle(gamepad2.square);
             telemetry.addData("isSpinningWheel", isSpinningWheel);
+            double currentThrowSpeed = 0;
             if (spinWheelAttached) {
                 if (isSpinningWheel) {
                     throwBalls.spin(true);
@@ -316,7 +329,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                     throwBalls.stop();
                 }
 
-                if (throwBalls.throwSpeed() > 1700) {
+                currentThrowSpeed = throwBalls.throwSpeed();
+                if (currentThrowSpeed > 1700) {
                     gamepad2.rumble(250);
                 }
             }
@@ -333,9 +347,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 isFlagRaised = false;
             }
 
-            telemetry.addData("ViskeKeerutikiirus", spinWheelAttached ? throwBalls.throwSpeed() : "N/A");
+            telemetry.addData("ViskeKeerutikiirus", spinWheelAttached ? currentThrowSpeed : "N/A");
             telemetry.addData("Field Centric", fieldCentric);
-            telemetry.addData("Heading", imuAngle * 180 / 3.14159265358979323);
+            telemetry.addData("Heading (Deg)", Math.toDegrees(imuAngle));
             /* ======================
                Drive gears: read bumpers to increment/decrement gear
                - clamps gear between 1 and 3 and maps to DriveGear enum
@@ -358,10 +372,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             }
 
             if (alignmentAttached) {
-                double distance = alignment.getDistance();
-                if (distance < 900) {
-                    telemetry.addData("Current distance: ", distance);
-                    if (distance < alignment.TARGET + alignment.TOLERANCE && distance > alignment.TARGET - alignment.TOLERANCE) {
+                if (currentDistance < 900) {
+                    telemetry.addData("Current distance: ", currentDistance);
+                    if (currentDistance < alignment.TARGET + alignment.TOLERANCE && currentDistance > alignment.TARGET - alignment.TOLERANCE) {
                         gamepad1.rumble(25);
                         gamepad2.rumble(25);
                     }
@@ -372,7 +385,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.addData("strafe", strafe);
             telemetry.addData("turn", turn);
             if (driveBaseAttached) {
-                driveBase.drive(imuAngle, imuPitch, drive, strafe, turn, fieldCentric, currentDriveGear);
+                driveBase.drive(imuAngle, imuPitch, drive, turn, strafe, fieldCentric, currentDriveGear);
             }
             telemetry.update();
         } // This brace correctly closes the `while (opModeIsActive())` loop.

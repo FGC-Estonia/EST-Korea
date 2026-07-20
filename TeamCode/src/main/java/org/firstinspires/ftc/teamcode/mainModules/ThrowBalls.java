@@ -41,7 +41,7 @@ public class ThrowBalls {
      */
     public void spin(boolean Spinning) {
         if (Spinning) {// Inside the while loop
-            wheelMotor.setVelocity(1900); // Set target velocity when activated
+            wheelMotor.setVelocity(1940); // Set target velocity when activated
         } else {
             wheelMotor.setVelocity(0); // Stop the wheel
         }
