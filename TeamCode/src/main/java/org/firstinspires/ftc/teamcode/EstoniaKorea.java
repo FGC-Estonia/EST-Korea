@@ -33,6 +33,7 @@ d!   'W M@@@A  ][  M@@@A W`   !b
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.common.util.ImuManager;
 import org.firstinspires.ftc.teamcode.mainModules.ClimbPole;
 import org.firstinspires.ftc.teamcode.mainModules.MoveRobot;
@@ -41,6 +42,9 @@ import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
 import org.firstinspires.ftc.teamcode.mainModules.FeedBalls;
 import org.firstinspires.ftc.teamcode.mainModules.RaiseFlag;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
+
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import org.firstinspires.ftc.teamcode.mainModules.Alignment;
 
 import org.firstinspires.ftc.teamcode.common.util.DriveBaseController;
 import static org.firstinspires.ftc.teamcode.mainModules.MoveRobot.DriveGear;
@@ -63,6 +67,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private ThrowBalls throwBalls = null;     // Ball launcher mechanism
     private DriveBaseController driveBase;    // Robot drivetrain control logic
 
+    Alignment alignment = new Alignment(true, hardwareMap, telemetry, gamepad1, gamepad2);
     // Attachment flags
     private boolean ropeClimbingAttached = false;
     private boolean raiseFlagAttached = false;
@@ -70,6 +75,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private boolean feedBallsAttached = false;
     private boolean shootBallsAttached = false;
     private boolean spinWheelAttached = false;
+
+    private DistanceSensor distanceSensor;
 
     int[] lastDriveMotorPositions = {0, 0, 0, 0};
     private boolean isSpinningWheel = false;
@@ -195,7 +202,12 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             //move robot
             double imuAngle = imuManager.getYawRadians();
             double imuPitch = imuManager.getPitchRadians();
-            double drive = -gamepad1.left_stick_y;
+            double drive;
+            if (gamepad1.right_trigger > 0.2){
+                drive = -gamepad1.left_stick_y + alignment.alignTarget();
+            } else {
+                drive = -gamepad1.left_stick_y;
+            }
             double strafe = gamepad1.left_stick_x;
             double turn = gamepad1.right_stick_x;
 
@@ -322,6 +334,15 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 currentDriveGear = DriveGear.MEDIUM;
             } else if (gear == 3) {
                 currentDriveGear = DriveGear.HIGH;
+            }
+
+            double distance = alignment.getDistance();
+            if (distance < 900) {
+                telemetry.addData("Current distance: ", distance);
+                if (distance< alignment.TARGET+ alignment.TOLERANCE&&distance> alignment.TARGET- alignment.TOLERANCE){
+                    gamepad1.rumble(25);
+                    gamepad2.rumble(25);
+                }
             }
 
             telemetry.addData("drive",drive);

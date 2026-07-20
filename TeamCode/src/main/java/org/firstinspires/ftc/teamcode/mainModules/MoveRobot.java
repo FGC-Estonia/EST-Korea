@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.mainModules;  //place where the code is l
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.common.util.DriveBaseController;
 
@@ -67,9 +68,9 @@ public class MoveRobot implements DriveBaseController {
         rightBackDriveEx = hardwareMap.get(DcMotorEx.class, HardwareConstants.RIGHT_BACK_MOTOR);
 
         //set the correct directions for the motors
-        leftFrontDriveEx.setDirection(DcMotorEx.Direction.REVERSE);
+        leftFrontDriveEx.setDirection(DcMotorEx.Direction.REVERSE); //WAS REVERSE
         leftBackDriveEx.setDirection(DcMotorEx.Direction.REVERSE);
-        rightFrontDriveEx.setDirection(DcMotorEx.Direction.FORWARD);
+        rightFrontDriveEx.setDirection(DcMotorEx.Direction.FORWARD); //WAS FORWARD
         rightBackDriveEx.setDirection(DcMotorEx.Direction.FORWARD);
 
 
@@ -135,10 +136,10 @@ public class MoveRobot implements DriveBaseController {
         }
 
         // Calculates raw power to motors
-        double leftFrontPowerRaw = x + y + turnCompensation;
-        double leftBackPowerRaw = x - y + turnCompensation;
-        double rightFrontPowerRaw = x - y - turnCompensation;
-        double rightBackPowerRaw = x + y - turnCompensation;
+        double leftFrontPowerRaw = x + y + turnCompensation; //WAS x + y + turnCompensation
+        double leftBackPowerRaw = x - y + turnCompensation; //WAS x - y + turnCompensation
+        double rightFrontPowerRaw = x - y - turnCompensation; //WAS x - y - turnCompensation
+        double rightBackPowerRaw = x + y - turnCompensation; //WAS x + y - turnCompensation
 
         // Calculate the maximum absolute power value for normalization
         double maxRawPower = Math.max(
