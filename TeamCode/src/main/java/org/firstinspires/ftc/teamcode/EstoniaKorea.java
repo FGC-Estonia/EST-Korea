@@ -66,8 +66,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private FeedBalls feedBalls = null;       // Ball feeding mechanism
     private ThrowBalls throwBalls = null;     // Ball launcher mechanism
     private DriveBaseController driveBase;    // Robot drivetrain control logic
+    private ImuManager imuManager;
 
-    Alignment alignment = new Alignment(true, hardwareMap, telemetry, gamepad1, gamepad2);
+    private Alignment alignment;
+    private boolean alignmentAttached = false;
     // Attachment flags
     private boolean ropeClimbingAttached = false;
     private boolean raiseFlagAttached = false;
@@ -75,8 +77,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private boolean feedBallsAttached = false;
     private boolean shootBallsAttached = false;
     private boolean spinWheelAttached = false;
-
-    private DistanceSensor distanceSensor;
+    private boolean driveBaseAttached = false;
+    private boolean imuManagerAttached = false;
 
     int[] lastDriveMotorPositions = {0, 0, 0, 0};
     private boolean isSpinningWheel = false;
@@ -100,11 +102,28 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     public void runOpMode() throws InterruptedException {
         boolean protect = true;
 
+        try {
+            alignment = new Alignment(true, hardwareMap, telemetry, gamepad1, gamepad2);
+            alignmentAttached = true;
+        } catch (Exception e) {
+            telemetry.log().add("Alignment hardware not found — alignment disabled");
+        }
+
         // --- Drive base init ---
-        driveBase = new MoveRobot(protect, hardwareMap, telemetry, true);
+        try {
+            driveBase = new MoveRobot(protect, hardwareMap, telemetry, true);
+            driveBaseAttached = true;
+        } catch (Exception e) {
+            telemetry.log().add("DriveBase hardware not found — drive disabled");
+        }
 
         // --- Core managers & modules initialization ---
-        ImuManager imuManager = new ImuManager(protect, hardwareMap, telemetry, true);
+        try {
+            imuManager = new ImuManager(protect, hardwareMap, telemetry, true);
+            imuManagerAttached = true;
+        } catch (Exception e) {
+            telemetry.log().add("IMU hardware not found — field centric disabled");
+        }
 
         // --- Try to attach optional modules (safe to fail) ---
 
@@ -195,15 +214,15 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         while (opModeIsActive()) { // main loop
 
             //gyro reset
-            if (gamepad1.options) {
+            if (gamepad1.options && imuManagerAttached) {
                 imuManager.resetImu();
             }
 
             //move robot
-            double imuAngle = imuManager.getYawRadians();
-            double imuPitch = imuManager.getPitchRadians();
+            double imuAngle = imuManagerAttached ? imuManager.getYawRadians() : 0;
+            double imuPitch = imuManagerAttached ? imuManager.getPitchRadians() : 0;
             double drive;
-            if (gamepad1.right_trigger > 0.2){
+            if (gamepad1.right_trigger > 0.2 && alignmentAttached){
                 drive = -gamepad1.left_stick_y + alignment.alignTarget();
             } else {
                 drive = -gamepad1.left_stick_y;
@@ -289,15 +308,17 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // --- THROW BALLS LOGIC ---
             // Toggles the spinning launcher wheel
             isSpinningWheel = gamepad2_square.toggle(gamepad2.square);
+            telemetry.addData("isSpinningWheel", isSpinningWheel);
             if (spinWheelAttached) {
                 if (isSpinningWheel) {
                     throwBalls.spin(true);
                 } else {
                     throwBalls.stop();
                 }
-            }
-            if (throwBalls.throwSpeed() > 1700) {
-                gamepad2.rumble(250);
+
+                if (throwBalls.throwSpeed() > 1700) {
+                    gamepad2.rumble(250);
+                }
             }
 
 
@@ -312,7 +333,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 isFlagRaised = false;
             }
 
-            telemetry.addData("ViskeKeerutikiirus", throwBalls.throwSpeed());
+            telemetry.addData("ViskeKeerutikiirus", spinWheelAttached ? throwBalls.throwSpeed() : "N/A");
             telemetry.addData("Field Centric", fieldCentric);
             telemetry.addData("Heading", imuAngle * 180 / 3.14159265358979323);
             /* ======================
@@ -336,19 +357,23 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 currentDriveGear = DriveGear.HIGH;
             }
 
-            double distance = alignment.getDistance();
-            if (distance < 900) {
-                telemetry.addData("Current distance: ", distance);
-                if (distance< alignment.TARGET+ alignment.TOLERANCE&&distance> alignment.TARGET- alignment.TOLERANCE){
-                    gamepad1.rumble(25);
-                    gamepad2.rumble(25);
+            if (alignmentAttached) {
+                double distance = alignment.getDistance();
+                if (distance < 900) {
+                    telemetry.addData("Current distance: ", distance);
+                    if (distance < alignment.TARGET + alignment.TOLERANCE && distance > alignment.TARGET - alignment.TOLERANCE) {
+                        gamepad1.rumble(25);
+                        gamepad2.rumble(25);
+                    }
                 }
             }
 
             telemetry.addData("drive",drive);
             telemetry.addData("strafe", strafe);
             telemetry.addData("turn", turn);
-            driveBase.drive(imuAngle, imuPitch, drive, strafe, turn, fieldCentric, currentDriveGear);
+            if (driveBaseAttached) {
+                driveBase.drive(imuAngle, imuPitch, drive, strafe, turn, fieldCentric, currentDriveGear);
+            }
             telemetry.update();
         } // This brace correctly closes the `while (opModeIsActive())` loop.
     } // This brace correctly closes the `runOpMode()` method.

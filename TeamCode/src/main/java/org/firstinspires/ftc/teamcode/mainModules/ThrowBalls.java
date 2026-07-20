@@ -31,6 +31,7 @@ public class ThrowBalls {
     private void mapMotor() {
         wheelMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.WHEEL_MOTOR);
         wheelMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        wheelMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
     /**
@@ -40,9 +41,9 @@ public class ThrowBalls {
      */
     public void spin(boolean Spinning) {
         if (Spinning) {// Inside the while loop
-            wheelMotor.setVelocity(1900);; // Maximum rpm when activated
+            wheelMotor.setVelocity(1900); // Set target velocity when activated
         } else {
-            wheelMotor.setVelocity(0); // No power for using flywheel inertia
+            wheelMotor.setVelocity(0); // Stop the wheel
         }
     }
 
