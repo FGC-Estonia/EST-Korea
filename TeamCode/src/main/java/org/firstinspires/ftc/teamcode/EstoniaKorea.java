@@ -231,12 +231,12 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             double drive;
             if (gamepad1.right_trigger > 0.2 && alignmentAttached){
-                drive = -gamepad1.left_stick_y + alignment.alignTarget(currentDistance);
+                drive = gamepad1.left_stick_y + alignment.alignTarget(currentDistance);
             } else {
-                drive = -gamepad1.left_stick_y;
+                drive = gamepad1.left_stick_y;
             }
-            double strafe = gamepad1.left_stick_x;
-            double turn = gamepad1.right_stick_x;
+            double strafe = -gamepad1.left_stick_x;
+            double turn = -gamepad1.right_stick_x;
 
             // FieldCentric rumble
             if (gamepad1_share.pressed(gamepad1.share)) {
@@ -284,9 +284,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // --- COLLECTING BALLS LOGIC ---
             // Triggers control sucking in or letting out balls
             if (gamepad2.right_trigger > 0) {
-                collectingDirection = -1;  // suck inj
+                collectingDirection = 1;  // suck inj
             } else if (gamepad2.left_trigger > 0) {
-                collectingDirection = 1; // let out
+                collectingDirection = -1; // let out
             } else {
                 collectingDirection = 0;  // hold
             }
