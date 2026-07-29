@@ -66,10 +66,10 @@ public class MoveRobot {
         rightBackDriveEx = hardwareMap.get(DcMotorEx.class, HardwareConstants.RIGHT_BACK_MOTOR);
 
         //set the correct directions for the motors
-        leftFrontDriveEx.setDirection(DcMotorEx.Direction.FORWARD);
-        leftBackDriveEx.setDirection(DcMotorEx.Direction.REVERSE);
-        rightFrontDriveEx.setDirection(DcMotorEx.Direction.REVERSE);
-        rightBackDriveEx.setDirection(DcMotorEx.Direction.FORWARD);
+        leftFrontDriveEx.setDirection(DcMotorEx.Direction.REVERSE);
+        leftBackDriveEx.setDirection(DcMotorEx.Direction.FORWARD);
+        rightFrontDriveEx.setDirection(DcMotorEx.Direction.FORWARD);
+        rightBackDriveEx.setDirection(DcMotorEx.Direction.REVERSE);
 
 
         // Depending on settings, the robot will run using velocity or power
