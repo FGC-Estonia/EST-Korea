@@ -2,13 +2,13 @@ package org.firstinspires.ftc.teamcode.mainModules;  //place where the code is l
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.teamcode.common.util.DriveBaseController;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
 
-public class MoveRobot implements DriveBaseController {
+public class MoveRobot {
 
 
     //these need to be defined here because they are used in multiple methods
@@ -27,7 +27,7 @@ public class MoveRobot implements DriveBaseController {
 
     double wantedAngle = 0;
 
-    double maxSpeed=1;
+    double maxSpeed = 1;
 
     // Defines the different drive speed gears.
 
@@ -47,7 +47,7 @@ public class MoveRobot implements DriveBaseController {
         }
     }
 
-    public MoveRobot(boolean protect, HardwareMap hardwareMap, Telemetry telemetry, boolean useVelocity){
+    public MoveRobot(boolean protect, HardwareMap hardwareMap, Telemetry telemetry, boolean useVelocity) {
 
         //Pass required objects and a setting to the class
         this.protect = protect;
@@ -66,9 +66,9 @@ public class MoveRobot implements DriveBaseController {
         rightBackDriveEx = hardwareMap.get(DcMotorEx.class, HardwareConstants.RIGHT_BACK_MOTOR);
 
         //set the correct directions for the motors
-        leftFrontDriveEx.setDirection(DcMotorEx.Direction.REVERSE);
+        leftFrontDriveEx.setDirection(DcMotorEx.Direction.FORWARD);
         leftBackDriveEx.setDirection(DcMotorEx.Direction.REVERSE);
-        rightFrontDriveEx.setDirection(DcMotorEx.Direction.FORWARD);
+        rightFrontDriveEx.setDirection(DcMotorEx.Direction.REVERSE);
         rightBackDriveEx.setDirection(DcMotorEx.Direction.FORWARD);
 
 
@@ -91,12 +91,12 @@ public class MoveRobot implements DriveBaseController {
      * Controls the robot's movement based on joystick inputs and current heading.
      * Can operate in field-centric or robot-centric mode.
      *
-     * @param heading Current robot heading in radians (e.g., from IMU).
-     * @param drive Forward/backward input (-1.0 to 1.0).
-     * @param strafe Left/right strafe input (-1.0 to 1.0) - Does tank strafe though?
-     * @param turn Turning input (-1.0 to 1.0).
+     * @param heading      Current robot heading in radians (e.g., from IMU).
+     * @param drive        Forward/backward input (-1.0 to 1.0).
+     * @param strafe       Left/right strafe input (-1.0 to 1.0) - Does tank strafe though?
+     * @param turn         Turning input (-1.0 to 1.0).
      * @param fieldCentric True if movement should be relative to the field, false for robot-centric.
-     * @param driveGear The selected drive gear (LOW, MEDIUM, HIGH) determining max speed.
+     * @param driveGear    The selected drive gear (LOW, MEDIUM, HIGH) determining max speed.
      */
     public void move(double heading, double drive, double strafe, double turn,
                      boolean fieldCentric,
@@ -168,16 +168,6 @@ public class MoveRobot implements DriveBaseController {
 
     }
 
-    @Override
-    public void drive(double imuAngle,
-                      double imuPitch,
-                      double drive,
-                      double strafe,
-                      double turn,
-                      boolean fieldCentric,
-                      DriveGear driveGear) {
-        move(imuAngle, drive, strafe, turn, fieldCentric, driveGear);
-    }
 
     public int[] getEncoderPositions() {
         return new int[]{

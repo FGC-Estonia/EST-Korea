@@ -46,7 +46,6 @@ import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.teamcode.mainModules.Alignment;
 
-import org.firstinspires.ftc.teamcode.common.util.DriveBaseController;
 import static org.firstinspires.ftc.teamcode.mainModules.MoveRobot.DriveGear;
 /* ======================
    Opmode annotation + class declaration
@@ -65,7 +64,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private CollectBalls collectBalls = null; // Ball intake mechanism
     private FeedBalls feedBalls = null;       // Ball feeding mechanism
     private ThrowBalls throwBalls = null;     // Ball launcher mechanism
-    private DriveBaseController driveBase;    // Robot drivetrain control logic
+    private MoveRobot driveBase;    // Robot drivetrain control logic
     private ImuManager imuManager;
 
     private Alignment alignment;
@@ -220,12 +219,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             //move robot
             double imuAngle = 0;
-            double imuPitch = 0;
             if (imuManagerAttached) {
-                com.qualcomm.robotcore.hardware.IMU imu = null; // We don't need the imu object directly
                 org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles angles = imuManager.getAngles();
                 imuAngle = angles.getYaw(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS);
-                imuPitch = angles.getPitch(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS);
             }
             
             double currentDistance = 1000.0;
@@ -385,7 +381,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.addData("strafe", strafe);
             telemetry.addData("turn", turn);
             if (driveBaseAttached) {
-                driveBase.drive(imuAngle, imuPitch, drive, turn, strafe, fieldCentric, currentDriveGear);
+                driveBase.move(imuAngle, drive, strafe, turn, fieldCentric, currentDriveGear);
             }
             telemetry.update();
         } // This brace correctly closes the `while (opModeIsActive())` loop.
