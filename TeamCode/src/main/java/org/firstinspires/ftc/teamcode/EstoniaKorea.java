@@ -40,7 +40,7 @@ import org.firstinspires.ftc.teamcode.mainModules.MoveRobot;
 import org.firstinspires.ftc.teamcode.common.util.Presses;
 import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
 import org.firstinspires.ftc.teamcode.mainModules.FeedBalls;
-import org.firstinspires.ftc.teamcode.mainModules.RaiseFlag;
+import org.firstinspires.ftc.teamcode.mainModules.Lock;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -59,7 +59,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     int climbingDirection = 0; // 0 - stop, 1 - stay on rope, 2 - up, -1 - down, 3 - joystick
 
     // --- Subsystem instances for robot modules ---
-    private RaiseFlag raiseFlag = null;      // Flag raising mechanism
+    private Lock lock = null;      // Climbing lock mechanism
     private ClimbPole climbRope = null;      // Pole climbing mechanism
     private CollectBalls collectBalls = null; // Ball intake mechanism
     private FeedBalls feedBalls = null;       // Ball feeding mechanism
@@ -71,7 +71,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private boolean alignmentAttached = false;
     // Attachment flags
     private boolean ropeClimbingAttached = false;
-    private boolean raiseFlagAttached = false;
+    private boolean lockAttached = false;
     private boolean collectBallsAttached = false;
     private boolean feedBallsAttached = false;
     private boolean shootBallsAttached = false;
@@ -88,8 +88,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER; // robot geometry for kinematics: half distances (meters) - replace with your robot measurements
 
     boolean fieldCentric = false;
-
-    boolean isFlagRaised = false;
 
     int gear = 1;
 
@@ -134,10 +132,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         }
 
         try {
-            raiseFlag = new RaiseFlag(hardwareMap, telemetry);
-            raiseFlagAttached = true;
+            lock = new Lock(hardwareMap, telemetry);
+            lockAttached = true;
         } catch (Exception e) {
-            telemetry.log().add("RaiseFlag hardware not found — flag raising disabled");
+            telemetry.log().add("Lock hardware not found — climbing lock disabled");
         }
 
         try {
@@ -185,16 +183,13 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         // > gamepad2.left_bumper   - climb up
         // > gamepad2.right_bumper  - climb down
         // > gamepad2.left_stick_y  - manual joystick control (when abs > 0.05)
-        // Resetting ropeclimb position:
-        Presses gamepad2_dpad_left = new Presses();
-        Presses gamepad2_dpad_right = new Presses();
 
         
         // Controls for drive gear
         Presses gamepad1_right_bumper = new Presses();
         Presses gamepad1_left_bumper = new Presses();
 
-        // Controls for flag raising
+        // Controls for climbing lock
         Presses gamepad2_share = new Presses();
 
 
@@ -255,7 +250,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // Handles logic for holding, climbing up/down, or manual joystick control
             boolean holdingOnRope = gamepad2_triangle.toggle(gamepad2.triangle);
 
-            if (holdingOnRope) {
+            if (lockAttached && lock.isLocked()) {
+                climbingDirection = 0;
+            } else if (holdingOnRope) {
                 climbingDirection = 1;  // hold position
             } else if (gamepad2.left_bumper) {
                 climbingDirection = 2;  // climb up
@@ -271,13 +268,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // Apply motor control
             if (ropeClimbingAttached) {
                 climbRope.ropeClimbing(climbingDirection, -gamepad2.left_stick_y);
-            }
-            if (gamepad2_dpad_right.pressed(gamepad2.dpad_right) && ropeClimbingAttached) {
-                climbRope.rememberHomePosition();
-            }
-
-            if (gamepad2_dpad_left.pressed(gamepad2.dpad_left) && ropeClimbingAttached) {
-                climbRope.rotateToHome();
             }
 
 
@@ -332,15 +322,15 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             }
 
 
-            // --- FLAG RAISING LOGIC ---
-            // Deploys the flag
-            boolean needFlagRaised = gamepad2_share.toggle(gamepad2.share);
-            if (needFlagRaised && !isFlagRaised && raiseFlagAttached) {
-                raiseFlag.setPos(1);
-                isFlagRaised = true;
-            } else if (!needFlagRaised && isFlagRaised && raiseFlagAttached) {
-                raiseFlag.setPos(0);
-                isFlagRaised = false;
+            // --- CLIMBING LOCK LOGIC ---
+            // Deploys the lock
+            boolean needLocked = gamepad2_share.toggle(gamepad2.share);
+            if (lockAttached) {
+                if (needLocked && !lock.isLocked()) {
+                    lock.lock();
+                } else if (!needLocked && lock.isLocked()) {
+                    lock.unlock();
+                }
             }
 
             telemetry.addData("ViskeKeerutikiirus", spinWheelAttached ? currentThrowSpeed : "N/A");

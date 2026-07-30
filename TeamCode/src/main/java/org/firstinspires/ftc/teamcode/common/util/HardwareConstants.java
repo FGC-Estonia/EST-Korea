@@ -13,7 +13,7 @@ public class HardwareConstants {
     public static final String ROPE_MOTOR = "Motor_Port_3_CH";
     // Other gadgets' motors
     public static final String WHEEL_MOTOR = "Motor_Port_1_CH";
-    public static final String FLAG_SERVO_MOTOR = "Servo_Port_0_CH";
+    public static final String LOCK_SERVO_MOTOR = "Servo_Port_0_CH";
     public static final String BALL_COLLECTOR_MOTOR = "Motor_Port_0_CH";
     public static final String FEEDER_MOTOR = "Motor_Port_2_CH";
 

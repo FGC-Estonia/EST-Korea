@@ -1,16 +1,15 @@
 This directory contains our main modules:
-<<<<<<< Updated upstream
 
-ClimbPole - 
+ClimbPole - Module for controlling the robot's pole climbing mechanism.
 
-CollectBalls -
+CollectBalls - Module for ball intake mechanism.
 
-MoveRobot -
+FeedBalls - Module for ball feeding mechanism to the launcher.
 
-Raiseflag - Module used for Raising/Lowering the servo operated flag
+Lock - Module for locking the climbing mechanism.
 
-SpinWheel - Module used for activing the spinner.
+MoveRobot - Robot drivetrain control logic.
 
-=======
-ClimbRope
->>>>>>> Stashed changes
+ThrowBalls - Module for ball launcher mechanism.
+
+Alignment - Module for aligning the robot to a target using distance sensors.
