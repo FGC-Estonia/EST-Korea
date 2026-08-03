@@ -11,8 +11,7 @@ import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
 /**
  * Module for feeding collected balls into the launcher.
  */
-public class +
-        eedBalls {
+public class FeedBalls {
     private DcMotorEx motor = null;
     private final boolean protect;
     private final HardwareMap hardwareMap;
