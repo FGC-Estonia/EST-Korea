@@ -41,6 +41,7 @@ import org.firstinspires.ftc.teamcode.common.util.Presses;
 import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
 import org.firstinspires.ftc.teamcode.mainModules.FeedBalls;
 import org.firstinspires.ftc.teamcode.mainModules.Lock;
+import org.firstinspires.ftc.teamcode.mainModules.Wink;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -60,6 +61,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
     // --- Subsystem instances for robot modules ---
     private Lock lock = null;      // Climbing lock mechanism
+
+    private Wink wink = null;
     private ClimbPole climbRope = null;      // Pole climbing mechanism
     private CollectBalls collectBalls = null; // Ball intake mechanism
     private FeedBalls feedBalls = null;       // Ball feeding mechanism
@@ -72,6 +75,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     // Attachment flags
     private boolean ropeClimbingAttached = false;
     private boolean lockAttached = false;
+    private boolean eyeWinked = false;
     private boolean collectBallsAttached = false;
     private boolean feedBallsAttached = false;
     private boolean shootBallsAttached = false;
@@ -137,7 +141,13 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         } catch (Exception e) {
             telemetry.log().add("Lock hardware not found — climbing lock disabled");
         }
+        try {
+            wink = new Wink(hardwareMap, telemetry);
+            eyeWinked = true;
+        } catch (Exception e) {
+            telemetry.log().add("Winking eye not found — Wink disabled");
 
+        }
         try {
             collectBalls = new CollectBalls(protect, hardwareMap, telemetry);
             collectBallsAttached = true;
@@ -192,6 +202,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         // Controls for climbing lock
         Presses gamepad2_share = new Presses();
 
+        Presses gamepad2_dpad_left = new Presses();
 
         Presses gamepad2_circle = new Presses();
 
@@ -268,6 +279,16 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // Apply motor control
             if (ropeClimbingAttached) {
                 climbRope.ropeClimbing(climbingDirection, -gamepad2.left_stick_y);
+            }
+
+            // WINKING
+            boolean eyesWinked = gamepad2_dpad_left.toggle(gamepad2.dpad_left);
+            if (eyesWinked && !eyeWinked) {
+                wink.setPos(1);
+                eyeWinked = true;
+            } else if (!eyesWinked && eyeWinked) {
+                wink.setPos(0);
+                eyeWinked = false;
             }
 
 
