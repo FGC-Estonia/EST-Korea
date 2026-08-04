@@ -30,7 +30,7 @@ public class ThrowBalls {
 
     private void mapMotor() {
         wheelMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.WHEEL_MOTOR);
-        wheelMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        wheelMotor.setDirection(DcMotorEx.Direction.FORWARD);
         wheelMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 

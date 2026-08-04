@@ -289,8 +289,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             // --- FEED BALLS LOGIC ---
             // Toggles the feeder mechanism to move balls to the launcher
-            boolean isFeeding = gamepad2_cross.toggle(gamepad2.cross);
-            boolean isClearing = gamepad2_dpad_down.toggle(gamepad2.dpad_down);
+            boolean isFeeding = gamepad2_dpad_down.toggle(gamepad2.dpad_down);
+            boolean isClearing = gamepad2_cross.toggle(gamepad2.cross);
             telemetry.addData("isFeeding", isFeeding);
             telemetry.addData("isClearing", isClearing);
             if (feedBallsAttached) {
