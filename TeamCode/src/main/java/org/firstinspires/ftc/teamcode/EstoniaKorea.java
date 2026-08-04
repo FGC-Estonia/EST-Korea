@@ -116,7 +116,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
         // --- Core managers & modules initialization ---
         try {
-            imuManager = new ImuManager(protect, hardwareMap, telemetry, true);
+            imuManager = new ImuManager(protect, hardwareMap, telemetry);
             imuManagerAttached = true;
         } catch (Exception e) {
             telemetry.log().add("IMU hardware not found — field centric disabled");

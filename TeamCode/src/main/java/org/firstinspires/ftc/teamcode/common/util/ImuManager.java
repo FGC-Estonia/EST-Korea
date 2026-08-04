@@ -18,7 +18,6 @@ public class ImuManager {
     private final Telemetry telemetry;
 
     private final boolean protect;
-    private final boolean xDrive;
 
     public void initImu(){
         if (protect) {
@@ -57,11 +56,10 @@ public class ImuManager {
         }
     }
 
-    public ImuManager(boolean protect, HardwareMap hardwareMap, Telemetry telemetry, boolean xDrive) {
+    public ImuManager(boolean protect, HardwareMap hardwareMap, Telemetry telemetry) {
         this.protect = protect;
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
-        this.xDrive = xDrive;
         initImu();
     }
 
