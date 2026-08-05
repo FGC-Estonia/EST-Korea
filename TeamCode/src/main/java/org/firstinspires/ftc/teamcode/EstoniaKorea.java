@@ -295,9 +295,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // --- COLLECTING BALLS LOGIC ---
             // Triggers control sucking in or letting out balls
             if (gamepad2.right_trigger > 0) {
-                collectingDirection = 1;  // suck inj
+                collectingDirection = -1;  // suck in
             } else if (gamepad2.left_trigger > 0) {
-                collectingDirection = -1; // let out
+                collectingDirection = 1; // let out
             } else {
                 collectingDirection = 0;  // hold
             }
@@ -310,8 +310,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             // --- FEED BALLS LOGIC ---
             // Toggles the feeder mechanism to move balls to the launcher
-            boolean isFeeding = gamepad2_dpad_down.toggle(gamepad2.dpad_down);
-            boolean isClearing = gamepad2_cross.toggle(gamepad2.cross);
+            boolean isFeeding = gamepad2_cross.toggle(gamepad2.cross);
+            boolean isClearing = gamepad2_dpad_down.toggle(gamepad2.dpad_down);
             telemetry.addData("isFeeding", isFeeding);
             telemetry.addData("isClearing", isClearing);
             if (feedBallsAttached) {
