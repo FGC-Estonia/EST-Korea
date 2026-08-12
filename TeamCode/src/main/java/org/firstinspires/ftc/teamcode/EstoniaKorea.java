@@ -33,7 +33,6 @@ d!   'W M@@@A  ][  M@@@A W`   !b
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.common.util.ImuManager;
 import org.firstinspires.ftc.teamcode.mainModules.ClimbPole;
 import org.firstinspires.ftc.teamcode.mainModules.MoveRobot;
@@ -44,7 +43,6 @@ import org.firstinspires.ftc.teamcode.mainModules.Lock;
 import org.firstinspires.ftc.teamcode.mainModules.Wink;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.teamcode.mainModules.Alignment;
 
 import static org.firstinspires.ftc.teamcode.mainModules.MoveRobot.DriveGear;
@@ -62,6 +60,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     // --- Subsystem instances for robot modules ---
     private Lock lock = null;      // Climbing lock mechanism
     private Wink wink = null;
+     private ClimbPole climbRope = null;      // Pole climbing mechanism
         private CollectBalls collectBalls = null; // Ball intake mechanism
     private FeedBalls feedBalls = null;       // Ball feeding mechanism
     private ThrowBalls throwBalls = null;     // Ball launcher mechanism
