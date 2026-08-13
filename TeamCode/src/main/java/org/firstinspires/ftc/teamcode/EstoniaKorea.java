@@ -94,7 +94,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private static final double TICKS_PER_REV = 560.0; // TICKS_PER_REV: encoder ticks per motor revolution
     private static final double WHEEL_DIAMETER = 0.09; // meters, replace with your wheel diameter
     private static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER; // robot geometry for kinematics: half distances (meters) - replace with your robot measurements
-    public static int spinSpeed = 1940;
+    public static int spinSpeed = 2350;
     boolean fieldCentric = false;
 
     int gear = 1;
