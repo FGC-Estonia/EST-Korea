@@ -326,6 +326,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             } else if (gamepad2.left_trigger > 0) {
                 collectingDirection = 1; // let out
             } else {
+
                 collectingDirection = 0;  // hold
             }
 
