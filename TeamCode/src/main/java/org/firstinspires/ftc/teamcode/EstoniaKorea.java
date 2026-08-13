@@ -311,10 +311,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // BUDDY CLIMBING
             boolean buddyClimbed = gamepad1_dpad_left.toggle(gamepad1.dpad_left);
             if (buddiesClimbed && !buddyClimbed) {
-                buddyClimb.setPos(1);
+                buddyClimb.setPos(0);
                 buddyClimbed = true;
             } else if (!buddiesClimbed && buddyClimbed) {
-                buddyClimb.setPos(0);
+                buddyClimb.setPos(1);
                 buddyClimbed = false;
             }
 
