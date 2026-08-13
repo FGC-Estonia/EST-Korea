@@ -60,8 +60,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     // --- Subsystem instances for robot modules ---
     private Lock lock = null;      // Climbing lock mechanism
     private Wink wink = null;
-     private ClimbPole climbRope = null;      // Pole climbing mechanism
-        private CollectBalls collectBalls = null; // Ball intake mechanism
+    private ClimbPole climbRope = null;      // Pole climbing mechanism
+    private CollectBalls collectBalls = null; // Ball intake mechanism
     private FeedBalls feedBalls = null;       // Ball feeding mechanism
     private ThrowBalls throwBalls = null;     // Ball launcher mechanism
     private MoveRobot driveBase;    // Robot drivetrain control logic
