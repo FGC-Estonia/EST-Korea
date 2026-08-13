@@ -381,9 +381,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                     lock.unlock();
                 }
             }
-            if (gamepad2.circle)
+            if (gamepad2_circle.pressed(gamepad2.circle))
             {
-                spinSpeed -= 194;
+                spinSpeed -= 90;
             }
 
             telemetry.addData("ViskeKeerutikiirus", spinWheelAttached ? currentThrowSpeed : "N/A");
