@@ -38,7 +38,7 @@ public class CollectBalls {
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         servoL = hardwareMap.get(Servo.class, HardwareConstants.REACHL_SERVO_MOTOR);
-        servoL.setDirection(Servo.Direction.FORWARD);
+        servoL.setDirection(Servo.Direction.REVERSE);
 
         servoR = hardwareMap.get(Servo.class, HardwareConstants.REACHR_SERVO_MOTOR);
         servoR.setDirection(Servo.Direction.FORWARD);
@@ -51,17 +51,21 @@ public class CollectBalls {
      */
     public void collectingBalls(int direction) {
         double power;
+        double servoDirection;
 
         if (direction == 1) {  // Suck in
             power = 1.0;
+            servoDirection = 1.0;
         } else if (direction == -1) {  // Let out
             power = -LET_BALLS_OUT_RATE;
+            servoDirection = 0;
         } else {
             power = 0;
+            servoDirection = 0.5;
         }
 
         motor.setPower(power);
-        servoL.setPosition(1);
-        servoR.setPosition(1);
+        servoL.setPosition(servoDirection);
+        servoR.setPosition(servoDirection);
     }
 }
