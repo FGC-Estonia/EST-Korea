@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.mainModules;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
@@ -13,6 +14,8 @@ import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
  */
 public class CollectBalls {
     private DcMotorEx motor = null;
+    private Servo servoL = null;
+    private Servo servoR = null;
     private final boolean protect;
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
@@ -33,11 +36,17 @@ public class CollectBalls {
 
         motor.setDirection(DcMotor.Direction.FORWARD);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        servoL = hardwareMap.get(Servo.class, HardwareConstants.REACHL_SERVO_MOTOR);
+        servoL.setDirection(Servo.Direction.FORWARD);
+
+        servoR = hardwareMap.get(Servo.class, HardwareConstants.REACHR_SERVO_MOTOR);
+        servoR.setDirection(Servo.Direction.FORWARD);
     }
 
     /**
      * Sets the collector motor power based on the desired direction.
-     * 
+     *
      * @param direction 1: suck in, -1: let out, 0: stop
      */
     public void collectingBalls(int direction) {
@@ -52,5 +61,7 @@ public class CollectBalls {
         }
 
         motor.setPower(power);
+        servoL.setPosition(1);
+        servoR.setPosition(1);
     }
 }

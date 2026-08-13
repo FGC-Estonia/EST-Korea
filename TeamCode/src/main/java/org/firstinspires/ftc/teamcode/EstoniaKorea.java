@@ -79,6 +79,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private boolean lockAttached = false;
     private boolean buddyClimbed = false;
     private boolean eyeWinked = false;
+    private boolean buddiesClimbed = false;
     private boolean collectBallsAttached = false;
     private boolean feedBallsAttached = false;
     private boolean shootBallsAttached = false;
@@ -150,6 +151,14 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         } catch (Exception e) {
             telemetry.log().add("Winking eye not found — Wink disabled");
         }
+
+        try {
+            buddyClimb = new BuddyClimb(hardwareMap, telemetry);
+            buddiesClimbed = true;
+        } catch (Exception e) {
+            telemetry.log().add("Helper servo not found — Buddy climb disabled");
+        }
+
         try {
             buddyClimb = new BuddyClimb(hardwareMap, telemetry);
             buddyClimbed = true;
@@ -300,7 +309,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             }
 
             // BUDDY CLIMBING
-            boolean buddiesClimbed = gamepad1_dpad_left.toggle(gamepad1.dpad_left);
+            boolean buddyClimbed = gamepad1_dpad_left.toggle(gamepad1.dpad_left);
             if (buddiesClimbed && !buddyClimbed) {
                 buddyClimb.setPos(1);
                 buddyClimbed = true;

@@ -11,21 +11,19 @@ public class BuddyClimb {
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
 
+    private void mapServo() {
+        buddyServo = hardwareMap.get(Servo.class, HardwareConstants.BUDDY_SERVO_MOTOR);
+        buddyServo.setDirection(Servo.Direction.FORWARD);
+    }
+
     public BuddyClimb(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
         mapServo();
     }
-    private void mapServo() {
-        buddyServo = hardwareMap.get(Servo.class, HardwareConstants.BUDDY_SERVO_MOTOR);
-        buddyServo.setDirection(Servo.Direction.FORWARD);
-    }
     public void setPos(double pos) {
             buddyServo.setPosition(pos);
         }
-
-
-
     }
 
 
