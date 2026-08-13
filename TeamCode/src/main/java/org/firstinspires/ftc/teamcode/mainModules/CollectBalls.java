@@ -38,10 +38,10 @@ public class CollectBalls {
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         servoL = hardwareMap.get(Servo.class, HardwareConstants.REACHL_SERVO_MOTOR);
-        servoL.setDirection(Servo.Direction.REVERSE);
+        servoL.setDirection(Servo.Direction.FORWARD);
 
         servoR = hardwareMap.get(Servo.class, HardwareConstants.REACHR_SERVO_MOTOR);
-        servoR.setDirection(Servo.Direction.FORWARD);
+        servoR.setDirection(Servo.Direction.REVERSE);
     }
 
     /**
