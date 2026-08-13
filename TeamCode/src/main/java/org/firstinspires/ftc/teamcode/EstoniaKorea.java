@@ -59,6 +59,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
     // --- Subsystem instances for robot modules ---
     private Lock lock = null;      // Climbing lock mechanism
+
     private Wink wink = null;
     private ClimbPole climbRope = null;      // Pole climbing mechanism
     private CollectBalls collectBalls = null; // Ball intake mechanism
@@ -145,7 +146,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.log().add("Winking eye not found — Wink disabled");
 
         }
-
         try {
             collectBalls = new CollectBalls(protect, hardwareMap, telemetry);
             collectBallsAttached = true;
