@@ -42,6 +42,7 @@ import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
 import org.firstinspires.ftc.teamcode.mainModules.FeedBalls;
 import org.firstinspires.ftc.teamcode.mainModules.Lock;
 import org.firstinspires.ftc.teamcode.mainModules.Wink;
+import org.firstinspires.ftc.teamcode.mainModules.BuddyClimb;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -63,6 +64,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private Lock lock = null;      // Climbing lock mechanism
 
     private Wink wink = null;
+    private BuddyClimb buddyClimb = null;
     private ClimbPole climbRope = null;      // Pole climbing mechanism
     private CollectBalls collectBalls = null; // Ball intake mechanism
     private FeedBalls feedBalls = null;       // Ball feeding mechanism
@@ -75,6 +77,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     // Attachment flags
     private boolean ropeClimbingAttached = false;
     private boolean lockAttached = false;
+    private boolean buddyClimbed = false;
     private boolean eyeWinked = false;
     private boolean collectBallsAttached = false;
     private boolean feedBallsAttached = false;
@@ -146,7 +149,12 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             eyeWinked = true;
         } catch (Exception e) {
             telemetry.log().add("Winking eye not found — Wink disabled");
-
+        }
+        try {
+            buddyClimb = new BuddyClimb(hardwareMap, telemetry);
+            buddyClimbed = true;
+        } catch (Exception e) {
+            telemetry.log().add("Servo for helping not found — Buddy climb disabled");
         }
         try {
             collectBalls = new CollectBalls(protect, hardwareMap, telemetry);
@@ -289,6 +297,16 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             } else if (!eyesWinked && eyeWinked) {
                 wink.setPos(0);
                 eyeWinked = false;
+            }
+
+            // BUDDY CLIMBING
+            boolean buddiesClimbed = gamepad1_dpad_left.toggle(gamepad1.dpad_left);
+            if (buddiesClimbed && !buddyClimbed) {
+                buddyClimb.setPos(1);
+                buddyClimbed = true;
+            } else if (!buddiesClimbed && buddyClimbed) {
+                buddyClimb.setPos(0);
+                buddyClimbed = false;
             }
 
 
