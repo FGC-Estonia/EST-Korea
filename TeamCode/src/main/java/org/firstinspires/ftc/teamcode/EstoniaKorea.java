@@ -49,6 +49,7 @@ import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.teamcode.mainModules.Alignment;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static org.firstinspires.ftc.teamcode.mainModules.MoveRobot.DriveGear;
 /* ======================
@@ -75,6 +76,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private ImuManager imuManager;
     private VoltageSensor myControlHubVoltageSensor;
     private Alignment alignment;
+    private ElapsedTime wiggleTimer = new ElapsedTime();
 
 
     private boolean alignmentAttached = false;
@@ -91,6 +93,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private boolean spinWheelAttached = false;
     private boolean driveBaseAttached = false;
     private boolean imuManagerAttached = false;
+    private int wigglePos = 0;
 
     int[] lastDriveMotorPositions = {0, 0, 0, 0};
     private boolean isSpinningWheel = false;
@@ -158,7 +161,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         }
         try {
             wiggle = new Wiggle(hardwareMap, telemetry);
-            wiggled = true;
+            wiggled = false;
         } catch (Exception e) {
             telemetry.log().add("Wiggling not found — Wiggle disabled");
         }
@@ -325,11 +328,20 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // WIGGLING
             boolean wiggleds = gamepad2_options.toggle(gamepad2.options);
             if (wiggleds && !wiggled) {
-                wiggle.setPos(1);
                 wiggled = true;
+                wiggle.setPos(1);
+                wigglePos = 1;
+                wiggleTimer.reset();
             } else if (!wiggleds && wiggled) {
-                wiggle.setPos(0);
                 wiggled = false;
+                wiggle.setPos(0);
+            }
+            if (wiggled) {
+                if (wiggleTimer.milliseconds() > 690) {
+                    wigglePos = (wigglePos == 0) ? 1 : 0;
+                    wiggle.setPos(wigglePos);
+                    wiggleTimer.reset();
+                }
             }
 
             // BUDDY CLIMBING
