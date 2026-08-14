@@ -243,6 +243,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         // Controls for lower spinSpeed
         Presses gamepad2_circle = new Presses();
 
+        // Wiggle
+        Presses gamepad2_options = new Presses();
+
         telemetry.update();
         waitForStart(); //everything has been initialized, waiting for the start button
         while (opModeIsActive()) { // main loop
@@ -320,7 +323,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 eyeWinked = false;
             }
             // WIGGLING
-            boolean wiggleds = gamepad2_share.toggle(gamepad2.share);
+            boolean wiggleds = gamepad2_options.toggle(gamepad2.options);
             if (wiggleds && !wiggled) {
                 wiggle.setPos(1);
                 wiggled = true;
