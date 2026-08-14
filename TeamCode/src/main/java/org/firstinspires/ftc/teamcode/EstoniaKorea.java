@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.common.util.ImuManager;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.teamcode.mainModules.ClimbPole;
 import org.firstinspires.ftc.teamcode.mainModules.MoveRobot;
 import org.firstinspires.ftc.teamcode.common.util.Presses;
@@ -62,7 +63,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
     // --- Subsystem instances for robot modules ---
     private Lock lock = null;      // Climbing lock mechanism
-
     private Wink wink = null;
     private BuddyClimb buddyClimb = null;
     private ClimbPole climbRope = null;      // Pole climbing mechanism
@@ -71,8 +71,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private ThrowBalls throwBalls = null;     // Ball launcher mechanism
     private MoveRobot driveBase;    // Robot drivetrain control logic
     private ImuManager imuManager;
-
+    private VoltageSensor myControlHubVoltageSensor;
     private Alignment alignment;
+
+
     private boolean alignmentAttached = false;
     // Attachment flags
     private boolean ropeClimbingAttached = false;
@@ -185,6 +187,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         } catch (Exception e) {
             telemetry.log().add("SpinWheel hardware not found — spinning wheel disabled");
         }
+
+        myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
          /* ======================
            Controls: Presses wrappers and toggles
@@ -420,11 +424,16 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 }
             }
 
+            double presentVoltage;
+            presentVoltage = myControlHubVoltageSensor.getVoltage();
+
             telemetry.addData("drive",drive);
             telemetry.addData("strafe", strafe);
             telemetry.addData("turn", turn);
             if (driveBaseAttached) {
-                driveBase.move(imuAngle, drive, strafe, turn, fieldCentric, currentDriveGear);
+
+                double compensation = 12.0 / presentVoltage;
+                driveBase.move(imuAngle, drive * compensation, strafe * compensation, turn * compensation, fieldCentric, currentDriveGear);
             }
             telemetry.update();
         } // This brace correctly closes the `while (opModeIsActive())` loop.
