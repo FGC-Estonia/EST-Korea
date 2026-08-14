@@ -43,6 +43,7 @@ import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
 import org.firstinspires.ftc.teamcode.mainModules.FeedBalls;
 import org.firstinspires.ftc.teamcode.mainModules.Lock;
 import org.firstinspires.ftc.teamcode.mainModules.Wink;
+import org.firstinspires.ftc.teamcode.mainModules.Wiggle;
 import org.firstinspires.ftc.teamcode.mainModules.BuddyClimb;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 
@@ -64,6 +65,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     // --- Subsystem instances for robot modules ---
     private Lock lock = null;      // Climbing lock mechanism
     private Wink wink = null;
+    private Wiggle wiggle = null;
     private BuddyClimb buddyClimb = null;
     private ClimbPole climbRope = null;      // Pole climbing mechanism
     private CollectBalls collectBalls = null; // Ball intake mechanism
@@ -79,8 +81,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     // Attachment flags
     private boolean ropeClimbingAttached = false;
     private boolean lockAttached = false;
-    private boolean buddyClimbed = false;
+    private boolean buddyClimbed = true;
     private boolean eyeWinked = false;
+    private boolean wiggled = false;
     private boolean buddiesClimbed = false;
     private boolean collectBallsAttached = false;
     private boolean feedBallsAttached = false;
@@ -152,6 +155,12 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             eyeWinked = true;
         } catch (Exception e) {
             telemetry.log().add("Winking eye not found — Wink disabled");
+        }
+        try {
+            wiggle = new Wiggle(hardwareMap, telemetry);
+            wiggled = true;
+        } catch (Exception e) {
+            telemetry.log().add("Wiggling not found — Wiggle disabled");
         }
 
         try {
@@ -289,7 +298,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 climbingDirection = 2;  // climb up
             } else if (gamepad2.right_bumper) {
                 climbingDirection = -1; // climb down
-            } else if (Math.abs(gamepad2.left_stick_y) > 0.05) {
+            } else if (Math.abs(gamepad2.right_stick_y) > 0.05) {
                 climbingDirection = 3;
             } else {
                 climbingDirection = 0;
@@ -298,17 +307,26 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             // Apply motor control
             if (ropeClimbingAttached) {
-                climbRope.ropeClimbing(climbingDirection, -gamepad2.left_stick_y);
+                climbRope.ropeClimbing(climbingDirection, -gamepad2.right_stick_y);
             }
 
             // WINKING
-            boolean eyesWinked = gamepad2_dpad_left.toggle(gamepad2.dpad_left);
+            boolean eyesWinked = gamepad2_share.toggle(gamepad2.share);
             if (eyesWinked && !eyeWinked) {
                 wink.setPos(1);
                 eyeWinked = true;
             } else if (!eyesWinked && eyeWinked) {
                 wink.setPos(0);
                 eyeWinked = false;
+            }
+            // WIGGLING
+            boolean wiggleds = gamepad2_share.toggle(gamepad2.share);
+            if (wiggleds && !wiggled) {
+                wiggle.setPos(1);
+                wiggled = true;
+            } else if (!wiggleds && wiggled) {
+                wiggle.setPos(0);
+                wiggled = false;
             }
 
             // BUDDY CLIMBING
@@ -341,8 +359,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             // --- FEED BALLS LOGIC ---
             // Toggles the feeder mechanism to move balls to the launcher
-            boolean isFeeding = gamepad2_cross.toggle(gamepad2.cross);
-            boolean isClearing = gamepad2_dpad_down.toggle(gamepad2.dpad_down);
+            boolean isFeeding = gamepad2_dpad_down.toggle(gamepad2.dpad_down);
+            boolean isClearing = gamepad2_dpad_up.toggle(gamepad2.dpad_up);
             telemetry.addData("isFeeding", isFeeding);
             telemetry.addData("isClearing", isClearing);
             if (feedBallsAttached) {
@@ -357,7 +375,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             // --- THROW BALLS LOGIC ---
             // Toggles the spinning launcher wheel
-            isSpinningWheel = gamepad2_square.toggle(gamepad2.square);
+            isSpinningWheel = gamepad2_dpad_left.toggle(gamepad2.dpad_left);
             telemetry.addData("isSpinningWheel", isSpinningWheel);
             double currentThrowSpeed = 0;
             if (spinWheelAttached) {
@@ -376,10 +394,11 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             // --- CLIMBING LOCK LOGIC ---
             // Deploys the lock
-            boolean needLocked = gamepad2_share.toggle(gamepad2.share);
+            boolean needLocked = gamepad2_square.toggle(gamepad2.square);
             if (lockAttached) {
                 if (needLocked && !lock.isLocked()) {
                     lock.lock();
+                    gamepad2.rumble(25);
                 } else if (!needLocked && lock.isLocked()) {
                     lock.unlock();
                 }

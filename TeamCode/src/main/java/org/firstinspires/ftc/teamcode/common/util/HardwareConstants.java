@@ -20,7 +20,7 @@ public class HardwareConstants {
     public static final String LOCK_SERVO_MOTOR = "Servo_Port_3_CH";
     public static final String WINK_SERVO_MOTOR = "Servo_Port_4_CH";
     public static final String BUDDY_SERVO_MOTOR = "Servo_Port_5_CH";
-
+    public static final String WIGGLE_SERVO_MOTOR = "Servo_Port_2_CH";
 
 
     // Tankdrive motors
