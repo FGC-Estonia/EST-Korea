@@ -197,7 +197,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         // Unused controls reserved for future use
         Presses gamepad1_left_trigger = new Presses();
         Presses gamepad1_right_trigger = new Presses();
-
         Presses gamepad1_dpad_left = new Presses();
         Presses gamepad1_dpad_right = new Presses();
         Presses gamepad1_dpad_up = new Presses();
