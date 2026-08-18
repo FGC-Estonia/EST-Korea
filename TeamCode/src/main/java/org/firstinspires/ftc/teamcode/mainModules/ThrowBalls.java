@@ -48,6 +48,9 @@ public class ThrowBalls {
     public double throwSpeed() {
         return wheelMotor.getVelocity();
     }
+    public boolean isAtSpeed() {
+        return wheelMotor.getVelocity() > 2100;
+    }
     public void stop() {
         wheelMotor.setVelocity(0);
     }

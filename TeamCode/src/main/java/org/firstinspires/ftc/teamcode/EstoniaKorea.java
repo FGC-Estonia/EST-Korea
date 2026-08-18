@@ -376,7 +376,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.addData("isFeeding", isFeeding);
             telemetry.addData("isClearing", isClearing);
             if (feedBallsAttached) {
-                if (isFeeding) {
+                // Only feed if the flywheel is at the right speed
+                boolean atSpeed = throwBalls.isAtSpeed();
+                if (isFeeding && atSpeed) {
                     feedBalls.feed(true);
                 } else if (isClearing){
                     feedBalls.clear(true);
