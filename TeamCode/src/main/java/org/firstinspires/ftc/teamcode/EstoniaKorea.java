@@ -102,7 +102,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private static final double TICKS_PER_REV = 560.0; // TICKS_PER_REV: encoder ticks per motor revolution
     private static final double WHEEL_DIAMETER = 0.09; // meters, replace with your wheel diameter
     private static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER; // robot geometry for kinematics: half distances (meters) - replace with your robot measurements
-    public static int spinSpeed = 2350;
     boolean fieldCentric = false;
 
     int gear = 1;
@@ -236,15 +235,13 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
         Presses gamepad2_dpad_left = new Presses();
 
+        Presses gamepad2_touchpad = new Presses();
         // Controls for Throwing balls
         Presses gamepad2_square = new Presses();
 
         // Controls for fieldcentric toggle and gyro reset
         Presses gamepad1_share = new Presses();
         Presses gamepad1_options = new Presses();
-
-        // Controls for lower spinSpeed
-        Presses gamepad2_circle = new Presses();
 
         // Wiggle
         Presses gamepad2_options = new Presses();
@@ -326,7 +323,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 eyeWinked = false;
             }
             // WIGGLING
-            boolean wiggleds = gamepad2_options.toggle(gamepad2.options);
+            boolean wiggleds = gamepad2_touchpad.toggle(gamepad2.touchpad);
             if (wiggleds && !wiggled) {
                 wiggled = true;
                 wiggle.setPos(1);
@@ -417,10 +414,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 } else if (!needLocked && lock.isLocked()) {
                     lock.unlock();
                 }
-            }
-            if (gamepad2_circle.pressed(gamepad2.circle))
-            {
-                spinSpeed -= 90;
             }
 
             telemetry.addData("ViskeKeerutikiirus", spinWheelAttached ? currentThrowSpeed : "N/A");

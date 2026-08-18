@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
-import static org.firstinspires.ftc.teamcode.EstoniaKorea.spinSpeed;
 /**
  * Module for launching balls toward the goal.
  */
@@ -40,7 +39,7 @@ public class ThrowBalls {
      */
     public void spin(boolean Spinning) {
         if (Spinning) {// Inside the while loop
-            wheelMotor.setVelocity(spinSpeed); // Set target velocity when activated
+            wheelMotor.setVelocity(2350); // Set target velocity when activated
         } else {
             wheelMotor.setVelocity(0); // Stop the wheel
         }
