@@ -34,7 +34,7 @@ public class CollectBalls {
     private void mapMotors() {
         motor = hardwareMap.get(DcMotorEx.class, HardwareConstants.BALL_COLLECTOR_MOTOR);
 
-        motor.setDirection(DcMotor.Direction.FORWARD);
+        motor.setDirection(DcMotor.Direction.REVERSE);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         servoL = hardwareMap.get(Servo.class, HardwareConstants.REACHL_SERVO_MOTOR);

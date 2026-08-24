@@ -236,10 +236,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         Presses gamepad2_dpad_left = new Presses();
 
         Presses gamepad2_touchpad = new Presses();
-        // Controls for Throwing balls
+        // Controls for Lock
         Presses gamepad2_square = new Presses();
 
-        // Controls for fieldcentric toggle and gyro reset
+        // Controls for field-centric toggle and gyro reset
         Presses gamepad1_share = new Presses();
         Presses gamepad1_options = new Presses();
 
@@ -380,8 +380,18 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 boolean atSpeed = throwBalls.isAtSpeed();
                 if (isFeeding && atSpeed) {
                     feedBalls.feed(true);
+                    if (isClearing) {
+                        gamepad2_dpad_down.setToggleFalse();
+                        feedBalls.feed(false);
+                        feedBalls.clear(true);
+                    }
                 } else if (isClearing){
                     feedBalls.clear(true);
+                    if (isFeeding) {
+                        feedBalls.clear(false);
+                        gamepad2_dpad_up.setToggleFalse();
+                        feedBalls.feed(true);
+                    }
                 } else {
                     feedBalls.stop();
                 }
