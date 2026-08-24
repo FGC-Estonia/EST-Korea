@@ -16,6 +16,8 @@ public class ThrowBalls {
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
     private final boolean protect;
+    private static final double REQUIRED_SPEED = 2100;
+    private static final double WHEEL_VELOCITY = 2350;
     /**
      * Initializes the launcher module.
      */
@@ -34,12 +36,12 @@ public class ThrowBalls {
 
     /**
      * Spins the launcher wheel.
-     * 
+     *
      * @param Spinning True to spin at full power, false to stop.
      */
     public void spin(boolean Spinning) {
         if (Spinning) {// Inside the while loop
-            wheelMotor.setVelocity(2350); // Set target velocity when activated
+            wheelMotor.setVelocity(WHEEL_VELOCITY); // Set target velocity when activated
         } else {
             wheelMotor.setVelocity(0); // Stop the wheel
         }
@@ -49,7 +51,7 @@ public class ThrowBalls {
         return wheelMotor.getVelocity();
     }
     public boolean isAtSpeed() {
-        return wheelMotor.getVelocity() > 2100;
+        return wheelMotor.getVelocity() > REQUIRED_SPEED;
     }
     public void stop() {
         wheelMotor.setVelocity(0);
