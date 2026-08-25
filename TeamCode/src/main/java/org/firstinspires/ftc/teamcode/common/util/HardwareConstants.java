@@ -11,8 +11,8 @@ public class HardwareConstants {
     public static final String ROPE_MOTOR = "Motor_Port_0_CH";
     // Other gadgets' motors
     public static final String WHEEL_MOTOR = "Motor_Port_1_EH";
-    public static final String BALL_COLLECTOR_MOTOR = "Motor_Port_0_CH";
-    public static final String FEEDER_MOTOR = "Motor_Port_2_EH";
+    public static final String BALL_COLLECTOR_MOTOR = "Motor_Port_2_EH";
+    public static final String FEEDER_MOTOR = "Motor_Port_3_EH";
     public static final String REACHL_SERVO_MOTOR = "Servo_Port_3_CH";
     public static final String REACHR_SERVO_MOTOR = "Servo_Port_4_EH";
     public static final String LOCK_SERVO_MOTOR = "Servo_Port_5_EH";

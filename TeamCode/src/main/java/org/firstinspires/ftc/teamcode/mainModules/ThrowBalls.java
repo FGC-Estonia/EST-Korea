@@ -16,8 +16,8 @@ public class ThrowBalls {
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
     private final boolean protect;
-    private static final double REQUIRED_SPEED = 2100;
-    private static final double WHEEL_VELOCITY = 2350;
+    private static final double REQUIRED_SPEED = 1250;
+    private static final double WHEEL_VELOCITY = 1300;
     /**
      * Initializes the launcher module.
      */
