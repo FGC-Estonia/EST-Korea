@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode.mainModules;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
 /**
  * Module for launching balls toward the goal.
@@ -16,8 +14,11 @@ public class ThrowBalls {
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
     private final boolean protect;
-    private static final double REQUIRED_SPEED = 1250;
-    private static final double WHEEL_VELOCITY = 1300;
+    private static final double REQUIRED_SPEED_RPM = 2675;
+    private static final double WHEEL_VELOCITY_RPM = 2785;
+
+    private static final double REQUIRED_SPEED = REQUIRED_SPEED_RPM/60*28;
+    private static final double WHEEL_VELOCITY = WHEEL_VELOCITY_RPM/60*28;
     /**
      * Initializes the launcher module.
      */
@@ -48,7 +49,7 @@ public class ThrowBalls {
     }
 
     public double throwSpeed() {
-        return wheelMotor.getVelocity();
+        return (wheelMotor.getVelocity()/28*60);
     }
     public boolean isAtSpeed() {
         return wheelMotor.getVelocity() > REQUIRED_SPEED;
