@@ -205,19 +205,11 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
            Controls: Presses wrappers and toggles
            ====================== */
 
-        // Unused controls reserved for future use
-        Presses gamepad1_left_trigger = new Presses();
-        Presses gamepad1_right_trigger = new Presses();
         Presses gamepad1_dpad_left = new Presses();
-        Presses gamepad1_dpad_right = new Presses();
-        Presses gamepad1_dpad_up = new Presses();
-        Presses gamepad2_dpad_up = new Presses();
 
-        Presses gamepad2_left_bumper = new Presses();
-        // Drive speed toggle group (replaced by drivegear)
         Presses.ToggleGroup feedClearToggle = new Presses.ToggleGroup();
-        Presses gamepad2_cross = new Presses(feedClearToggle);
         Presses gamepad2_dpad_down = new Presses(feedClearToggle);
+        Presses gamepad2_dpad_up = new Presses(feedClearToggle);
         // Controls for rope climbing
         Presses gamepad2_triangle = new Presses();
         // Also using:
