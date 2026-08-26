@@ -7,12 +7,12 @@
             <RevRoboticsUltraplanetaryHDHexMotor name="Motor_Port_1_EH" port="1" />
             <RevRoboticsUltraplanetaryHDHexMotor name="Motor_Port_2_EH" port="2" />
             <RevRoboticsUltraplanetaryHDHexMotor name="Motor_Port_3_EH" port="3" />
-            <ContinuousRotationServo name="Servo_Port_0_EH" port="0" />
-            <ContinuousRotationServo name="Servo_Port_1_EH" port="1" />
-            <ContinuousRotationServo name="Servo_Port_2_EH" port="2" />
-            <ContinuousRotationServo name="Servo_Port_3_EH" port="3" />
-            <ContinuousRotationServo name="Servo_Port_4_EH" port="4" />
-            <ContinuousRotationServo name="Servo_Port_5_EH" port="5" />
+            <Servo name="Servo_Port_0_EH" port="0" />
+            <Servo name="Servo_Port_1_EH" port="1" />
+            <Servo name="Servo_Port_2_EH" port="2" />
+            <Servo name="Servo_Port_3_EH" port="3" />
+            <Servo name="Servo_Port_4_EH" port="4" />
+            <Servo name="Servo_Port_5_EH" port="5" />
             <AnalogInput name="Analog_Port_0_EH" port="0" />
             <AnalogInput name="Analog_Port_1_EH" port="1" />
             <AnalogInput name="Analog_Port_2_EH" port="2" />
