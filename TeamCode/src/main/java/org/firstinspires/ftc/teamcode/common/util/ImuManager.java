@@ -28,8 +28,8 @@ public class ImuManager {
                 RevHubOrientationOnRobot.LogoFacingDirection logoDirection;
                 RevHubOrientationOnRobot.UsbFacingDirection usbDirection;
 
-                    logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
-                    usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
+                    logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.DOWN;
+                    usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
                 RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
@@ -44,8 +44,8 @@ public class ImuManager {
         }else {
             imu = hardwareMap.get(IMU.class, "imu");
 
-            RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
-            RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
+            RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.DOWN;
+            RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
             RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
