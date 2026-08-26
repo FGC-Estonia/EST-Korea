@@ -53,7 +53,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static org.firstinspires.ftc.teamcode.mainModules.MoveRobot.DriveGear;
 /* ======================
-   Opmode annotation + class declaration
+   Op-mode annotation + class declaration
    ====================== */
 @TeleOp(name = "Main code Estonia Korea")
 // allows to display the code in the driver station, comment out to remove
@@ -97,6 +97,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
     int[] lastDriveMotorPositions = {0, 0, 0, 0};
     private boolean isSpinningWheel = false;
+    private boolean recordingLowest = false;
+
 
     // Robot geometry / encoder constants
     private static final double TICKS_PER_REV = 560.0; // TICKS_PER_REV: encoder ticks per motor revolution
@@ -423,6 +425,21 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.addData("ViskeKeerutikiirus", spinWheelAttached ? currentThrowSpeed : "N/A");
             telemetry.addData("Field Centric", fieldCentric);
             telemetry.addData("Heading (Deg)", Math.toDegrees(imuAngle));
+            if (isSpinningWheel) {
+                double lowestSpeed = Double.MAX_VALUE;
+                if (!recordingLowest && currentThrowSpeed > 2675) {
+                    recordingLowest = true;
+                    lowestSpeed = currentThrowSpeed;
+                }
+                if (recordingLowest) {
+                    if (currentThrowSpeed < lowestSpeed) {
+                        lowestSpeed = currentThrowSpeed;
+                    }
+                    telemetry.addData("Lowest Speed", lowestSpeed);
+                }
+            } else {
+                recordingLowest = false;
+            }
             /* ======================
                Drive gears: read bumpers to increment/decrement gear
                - clamps gear between 1 and 3 and maps to DriveGear enum

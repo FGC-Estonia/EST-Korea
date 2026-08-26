@@ -96,10 +96,5 @@ public class AprilTag extends LinearOpMode {
                 telemetry.addLine(String.format(Locale.UK, "Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
             }
         }   // end for() loop
-
-        // Add "key" information to telemetry
-        telemetry.addLine("RBE = Range, Bearing & Elevation");
-
     }   // end method telemetryAprilTag()
-
 }   // end class
