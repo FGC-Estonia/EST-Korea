@@ -28,7 +28,7 @@ public class ClimbPole {
     }
 
     private void mapMotors() {
-        climbMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.ROPE_MOTOR);
+        climbMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.CLIMB_MOTOR);
         climbMotor.setDirection(DcMotor.Direction.REVERSE);
         climbMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         climbMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
