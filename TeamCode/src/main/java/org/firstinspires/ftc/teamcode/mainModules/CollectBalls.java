@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
+import org.firstinspires.ftc.teamcode.common.util.Protect;
 
 /**
  * Module for intake and collection of balls.
@@ -32,16 +33,31 @@ public class CollectBalls {
     }
 
     private void mapMotors() {
-        motor = hardwareMap.get(DcMotorEx.class, HardwareConstants.BALL_COLLECTOR_MOTOR);
+        // Each device is mapped on its own, so a missing reach servo costs us that
+        // servo and nothing else - the intake motor still runs.
+        motor = Protect.map(protect, telemetry, HardwareConstants.BALL_COLLECTOR_MOTOR, () -> {
+            DcMotorEx m = hardwareMap.get(DcMotorEx.class, HardwareConstants.BALL_COLLECTOR_MOTOR);
+            m.setDirection(DcMotor.Direction.REVERSE);
+            m.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            return m;
+        });
 
-        motor.setDirection(DcMotor.Direction.REVERSE);
-        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        servoL = Protect.map(protect, telemetry, HardwareConstants.REACHL_SERVO_MOTOR, () -> {
+            Servo s = hardwareMap.get(Servo.class, HardwareConstants.REACHL_SERVO_MOTOR);
+            s.setDirection(Servo.Direction.FORWARD);
+            return s;
+        });
 
-        servoL = hardwareMap.get(Servo.class, HardwareConstants.REACHL_SERVO_MOTOR);
-        servoL.setDirection(Servo.Direction.FORWARD);
+        servoR = Protect.map(protect, telemetry, HardwareConstants.REACHR_SERVO_MOTOR, () -> {
+            Servo s = hardwareMap.get(Servo.class, HardwareConstants.REACHR_SERVO_MOTOR);
+            s.setDirection(Servo.Direction.REVERSE);
+            return s;
+        });
+    }
 
-        servoR = hardwareMap.get(Servo.class, HardwareConstants.REACHR_SERVO_MOTOR);
-        servoR.setDirection(Servo.Direction.REVERSE);
+    /** True if the intake motor is there. The reach servos are optional extras. */
+    public boolean isAvailable() {
+        return motor != null;
     }
 
     /**
@@ -64,8 +80,16 @@ public class CollectBalls {
             servoDirection = 0.5;
         }
 
-        motor.setPower(power);
-        servoL.setPosition(servoDirection);
-        servoR.setPosition(servoDirection);
+        final double motorPower = power;
+        final double servoPos = servoDirection;
+        if (motor != null) {
+            Protect.run(protect, telemetry, "CollectBalls.motor", () -> motor.setPower(motorPower));
+        }
+        if (servoL != null) {
+            Protect.run(protect, telemetry, "CollectBalls.servoL", () -> servoL.setPosition(servoPos));
+        }
+        if (servoR != null) {
+            Protect.run(protect, telemetry, "CollectBalls.servoR", () -> servoR.setPosition(servoPos));
+        }
     }
 }

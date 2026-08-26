@@ -1,33 +1,179 @@
 package org.firstinspires.ftc.teamcode.mainModules;  //place where the code is located
 
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
+import org.firstinspires.ftc.teamcode.common.util.Protect;
 
 public class MoveRobot {
-
-
-    //these need to be defined here because they are used in multiple methods
-    private DcMotorEx leftFrontDriveEx = null;  //  Used to control the left front drive wheel
-    private DcMotorEx rightFrontDriveEx = null;  //  Used to control the right front drive wheel
-    private DcMotorEx leftBackDriveEx = null;  //  Used to control the left back drive wheel
-    private DcMotorEx rightBackDriveEx = null;  //  Used to control the right back drive wheel
 
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
 
     private final boolean useVelocity;
-
     private final boolean protect;
+
     double MAX_ANGULAR_VELOCITY_RADIANS = 1972.92;
 
     double wantedAngle = 0;
 
     double maxSpeed = 1;
+
+    /* ======================
+       Encoder health
+       ----------------------
+       In RUN_USING_ENCODER the motor controller closes a speed loop around the
+       encoder. Pull that encoder cable and the controller reads zero speed
+       forever, so it winds the power up to maximum trying to get there - the
+       wheel runs away and the robot is undriveable.
+
+       So each wheel watches itself: if it is being told to move and its encoder
+       count has not budged for a while, the encoder is treated as dead, that one
+       wheel drops to open-loop power control, and everything keeps driving. It is
+       per wheel, so three good encoders keep their closed loop.
+       ====================== */
+
+    /** Below this commanded fraction we are not really asking the wheel to move. */
+    public static final double ENCODER_CHECK_MIN_COMMAND = 0.25;
+
+    /** Ticks the encoder must move within the window to be considered alive. */
+    public static final int ENCODER_ALIVE_TICKS = 5;
+
+    /** How long a wheel may be driven with a frozen encoder before we give up on it. */
+    public static final double ENCODER_DEAD_MS = 400;
+
+    /**
+     * How often the encoder health check reads positions, milliseconds.
+     *
+     * <p>Reading a position is a round trip to the hub. Doing that for four
+     * wheels on every single loop is enough to put a visible delay in the
+     * driving, so the check samples on its own slow clock instead - it only
+     * needs to spot an encoder that has been frozen for {@link #ENCODER_DEAD_MS},
+     * which this is still far quicker than.
+     */
+    public static final double ENCODER_SAMPLE_MS = 50;
+
+    /** One drive wheel plus the health of its encoder. */
+    private final class Wheel {
+        final String name;
+        DcMotorEx motor;
+        boolean encoderDead = false;
+
+        private final ElapsedTime frozenFor = new ElapsedTime();
+        private final ElapsedTime sinceSample = new ElapsedTime();
+        private int lastPosition = 0;
+        private boolean havePosition = false;
+
+        Wheel(String name, DcMotorEx.Direction direction) {
+            this.name = name;
+            motor = Protect.map(protect, telemetry, name, () -> {
+                DcMotorEx m = hardwareMap.get(DcMotorEx.class, name);
+                m.setDirection(direction);
+                m.setMode(useVelocity
+                        ? DcMotor.RunMode.RUN_USING_ENCODER
+                        : DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                return m;
+            });
+        }
+
+        boolean present() {
+            return motor != null;
+        }
+
+        /** True while this wheel is still running its encoder speed loop. */
+        boolean usingEncoder() {
+            return useVelocity && !encoderDead;
+        }
+
+        int position() {
+            if (motor == null) {
+                return 0;
+            }
+            return (int) Protect.getDouble(protect, telemetry, "Encoder." + name,
+                    () -> motor.getCurrentPosition(), 0);
+        }
+
+        /**
+         * Watches for an encoder that has stopped counting while the wheel is
+         * being driven, and drops that wheel to open loop if it has.
+         *
+         * @param command how hard this wheel is being driven, 0..1
+         */
+        void checkEncoder(double command) {
+            if (motor == null || encoderDead || !useVelocity) {
+                return;
+            }
+
+            // Only touch the hardware on the slow clock - see ENCODER_SAMPLE_MS.
+            if (havePosition && sinceSample.milliseconds() < ENCODER_SAMPLE_MS) {
+                return;
+            }
+            sinceSample.reset();
+
+            int position = position();
+            if (!havePosition) {
+                havePosition = true;
+                lastPosition = position;
+                frozenFor.reset();
+                return;
+            }
+
+            if (Math.abs(command) < ENCODER_CHECK_MIN_COMMAND) {
+                // Not asking it to move, so a still encoder tells us nothing.
+                lastPosition = position;
+                frozenFor.reset();
+                return;
+            }
+
+            if (Math.abs(position - lastPosition) >= ENCODER_ALIVE_TICKS) {
+                lastPosition = position;
+                frozenFor.reset();
+                return;
+            }
+
+            if (frozenFor.milliseconds() > ENCODER_DEAD_MS) {
+                dropToOpenLoop();
+            }
+        }
+
+        /** Stop trusting this encoder and drive the wheel on raw power instead. */
+        private void dropToOpenLoop() {
+            encoderDead = true;
+            Protect.run(protect, telemetry, name + ".openLoop",
+                    () -> motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER));
+            if (telemetry != null) {
+                telemetry.log().add(name + ": encoder not counting - driving it on power instead");
+            }
+        }
+
+        /**
+         * @param velocity closed-loop target, ticks/sec
+         * @param power    open-loop fallback, -1..1
+         */
+        void drive(double velocity, double power) {
+            if (motor == null) {
+                return;
+            }
+            if (usingEncoder()) {
+                Protect.run(protect, telemetry, name, () -> motor.setVelocity(velocity));
+            } else {
+                Protect.run(protect, telemetry, name, () -> motor.setPower(power));
+            }
+        }
+    }
+
+    private final Wheel rightFront;
+    private final Wheel leftFront;
+    private final Wheel leftBack;
+    private final Wheel rightBack;
+
+    /** All four wheels, kept as a field so the per-loop checks allocate nothing. */
+    private final Wheel[] wheels;
 
     // Defines the different drive speed gears.
 
@@ -54,37 +200,72 @@ public class MoveRobot {
         this.telemetry = telemetry;
         this.hardwareMap = hardwareMap;
         this.useVelocity = useVelocity;
-        mapMotors();
+
+        // Each wheel is mapped on its own. Losing one motor to a bad cable used to
+        // throw out of here and take the whole drivetrain with it; now the other
+        // three still drive and only the dead corner is skipped.
+        rightFront = new Wheel(HardwareConstants.RIGHT_FRONT_MOTOR, DcMotorEx.Direction.FORWARD);
+        leftFront = new Wheel(HardwareConstants.LEFT_FRONT_MOTOR, DcMotorEx.Direction.REVERSE);
+        leftBack = new Wheel(HardwareConstants.LEFT_BACK_MOTOR, DcMotorEx.Direction.FORWARD);
+        rightBack = new Wheel(HardwareConstants.RIGHT_BACK_MOTOR, DcMotorEx.Direction.REVERSE);
+        wheels = new Wheel[]{rightFront, leftFront, leftBack, rightBack};
+
+        // One bulk read per loop instead of a separate round trip per encoder.
+        // Without this the health check alone adds four hub reads to every loop.
+        enableBulkReads();
     }
 
-    private void mapMotors() {
+    /**
+     * Puts every hub in AUTO bulk-caching mode, so all the encoder values for a
+     * loop arrive in a single transfer. This is what keeps the encoder health
+     * check from costing anything measurable.
+     */
+    private void enableBulkReads() {
+        Protect.run(protect, telemetry, "bulk reads", () -> {
+            for (LynxModule hub : hardwareMap.getAll(LynxModule.class)) {
+                hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+            }
+        });
+    }
 
-        // Mapping motors
-        rightFrontDriveEx = hardwareMap.get(DcMotorEx.class, HardwareConstants.RIGHT_FRONT_MOTOR);
-        leftFrontDriveEx = hardwareMap.get(DcMotorEx.class, HardwareConstants.LEFT_FRONT_MOTOR);
-        leftBackDriveEx = hardwareMap.get(DcMotorEx.class, HardwareConstants.LEFT_BACK_MOTOR);
-        rightBackDriveEx = hardwareMap.get(DcMotorEx.class, HardwareConstants.RIGHT_BACK_MOTOR);
+    /** True if at least one drive motor mapped - i.e. the robot can still move. */
+    public boolean isAvailable() {
+        return rightFront.present() || leftFront.present()
+                || leftBack.present() || rightBack.present();
+    }
 
-        //set the correct directions for the motors
-        leftFrontDriveEx.setDirection(DcMotorEx.Direction.REVERSE);
-        leftBackDriveEx.setDirection(DcMotorEx.Direction.FORWARD);
-        rightFrontDriveEx.setDirection(DcMotorEx.Direction.FORWARD);
-        rightBackDriveEx.setDirection(DcMotorEx.Direction.REVERSE);
+    /** How many of the four drive motors are actually present. */
+    public int getWorkingMotorCount() {
+        int n = 0;
+        if (rightFront.present()) n++;
+        if (leftFront.present()) n++;
+        if (leftBack.present()) n++;
+        if (rightBack.present()) n++;
+        return n;
+    }
 
-
-        // Depending on settings, the robot will run using velocity or power
-        if (useVelocity) {
-            leftFrontDriveEx.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            leftBackDriveEx.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightFrontDriveEx.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightBackDriveEx.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        } else {
-            leftFrontDriveEx.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            leftBackDriveEx.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            rightFrontDriveEx.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            rightBackDriveEx.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    /** Names of wheels whose encoder stopped counting, or "-" if all are fine. */
+    public String getDeadEncoders() {
+        StringBuilder sb = new StringBuilder();
+        for (Wheel w : wheels) {
+            if (w.present() && w.encoderDead) {
+                if (sb.length() > 0) {
+                    sb.append(", ");
+                }
+                sb.append(w.name);
+            }
         }
+        return sb.length() == 0 ? "-" : sb.toString();
+    }
 
+    /** True while every present wheel is still running closed loop on its encoder. */
+    public boolean allEncodersOk() {
+        for (Wheel w : wheels) {
+            if (w.present() && w.encoderDead) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -146,35 +327,36 @@ public class MoveRobot {
         // if the power is not over 1, the code will divide by 1, which doesn't affect the end result
         double max = Math.max(maxRawPower, 1);
 
-        if (useVelocity) {
-            // Calculate wheel speeds normalized to the wheels.
-            double leftFrontRawSpeed = (leftFrontPowerRaw / max * MAX_ANGULAR_VELOCITY_RADIANS);
-            double leftBackRawSpeed = (leftBackPowerRaw / max * MAX_ANGULAR_VELOCITY_RADIANS);
-            double rightFrontRawSpeed = (rightFrontPowerRaw / max * MAX_ANGULAR_VELOCITY_RADIANS);
-            double rightBackRawSpeed = (rightBackPowerRaw / max * MAX_ANGULAR_VELOCITY_RADIANS);
+        // Normalized -1..1 per wheel. This doubles as the open-loop power and as
+        // "how hard are we asking this wheel to turn" for the encoder check.
+        double leftFrontCommand = leftFrontPowerRaw / max * maxSpeed;
+        double leftBackCommand = leftBackPowerRaw / max * maxSpeed;
+        double rightFrontCommand = rightFrontPowerRaw / max * maxSpeed;
+        double rightBackCommand = rightBackPowerRaw / max * maxSpeed;
 
-            leftFrontDriveEx.setVelocity(leftFrontRawSpeed * maxSpeed);
-            leftBackDriveEx.setVelocity(leftBackRawSpeed * maxSpeed);
-            rightFrontDriveEx.setVelocity(rightFrontRawSpeed * maxSpeed);
-            rightBackDriveEx.setVelocity(rightBackRawSpeed * maxSpeed);
+        // Catch a dead encoder before handing it another velocity target.
+        leftFront.checkEncoder(leftFrontCommand);
+        leftBack.checkEncoder(leftBackCommand);
+        rightFront.checkEncoder(rightFrontCommand);
+        rightBack.checkEncoder(rightBackCommand);
 
-        } else {
-            // Set motor power directly
-            leftFrontDriveEx.setPower(leftFrontPowerRaw / max * maxSpeed);
-            leftBackDriveEx.setPower(leftBackPowerRaw / max * maxSpeed);
-            rightFrontDriveEx.setPower(rightFrontPowerRaw / max * maxSpeed);
-            rightBackDriveEx.setPower(rightBackPowerRaw / max * maxSpeed);
-        }
-
+        leftFront.drive(leftFrontPowerRaw / max * MAX_ANGULAR_VELOCITY_RADIANS * maxSpeed,
+                leftFrontCommand);
+        leftBack.drive(leftBackPowerRaw / max * MAX_ANGULAR_VELOCITY_RADIANS * maxSpeed,
+                leftBackCommand);
+        rightFront.drive(rightFrontPowerRaw / max * MAX_ANGULAR_VELOCITY_RADIANS * maxSpeed,
+                rightFrontCommand);
+        rightBack.drive(rightBackPowerRaw / max * MAX_ANGULAR_VELOCITY_RADIANS * maxSpeed,
+                rightBackCommand);
     }
 
 
     public int[] getEncoderPositions() {
         return new int[]{
-                rightFrontDriveEx.getCurrentPosition(),
-                leftFrontDriveEx.getCurrentPosition(),
-                leftBackDriveEx.getCurrentPosition(),
-                rightBackDriveEx.getCurrentPosition()
+                rightFront.position(),
+                leftFront.position(),
+                leftBack.position(),
+                rightBack.position()
         };
     }
 

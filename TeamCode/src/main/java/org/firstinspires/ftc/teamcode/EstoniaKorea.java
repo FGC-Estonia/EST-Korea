@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.teamcode.mainModules.ClimbPole;
 import org.firstinspires.ftc.teamcode.mainModules.MoveRobot;
 import org.firstinspires.ftc.teamcode.common.util.Presses;
+import org.firstinspires.ftc.teamcode.common.util.Protect;
 import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
 import org.firstinspires.ftc.teamcode.mainModules.FeedBalls;
 import org.firstinspires.ftc.teamcode.mainModules.Lock;
@@ -87,6 +88,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private boolean eyeWinked = false;
     private boolean wiggled = false;
     private boolean buddiesClimbed = false;
+    private boolean winkAttached = false;
+    private boolean wiggleAttached = false;
+    private boolean buddyClimbAttached = false;
     private boolean collectBallsAttached = false;
     private boolean feedBallsAttached = false;
     private boolean shootBallsAttached = false;
@@ -97,7 +101,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
     int[] lastDriveMotorPositions = {0, 0, 0, 0};
     private boolean isSpinningWheel = false;
-    private boolean recordingLowest = false;
 
 
     // Robot geometry / encoder constants
@@ -116,9 +119,12 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     public void runOpMode() throws InterruptedException {
         boolean protect = true;
 
+        // Fresh run - report every missing device again, once each.
+        Protect.resetReports();
+
         try {
             alignment = new Alignment(true, hardwareMap, telemetry, gamepad1, gamepad2);
-            alignmentAttached = true;
+            alignmentAttached = alignment.isAvailable();
         } catch (Exception e) {
             telemetry.log().add("Alignment hardware not found — alignment disabled");
         }
@@ -126,7 +132,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         // --- Drive base init ---
         try {
             driveBase = new MoveRobot(protect, hardwareMap, telemetry, true);
-            driveBaseAttached = true;
+            driveBaseAttached = driveBase.isAvailable();
         } catch (Exception e) {
             telemetry.log().add("DriveBase hardware not found — drive disabled");
         }
@@ -143,65 +149,61 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
         try {
             climbRope = new ClimbPole(protect, hardwareMap, telemetry);
-            ropeClimbingAttached = true;
+            ropeClimbingAttached = climbRope.isAvailable();
         } catch (Exception e) {
             telemetry.log().add("ClimbRope hardware not found — rope climb disabled");
         }
 
         try {
-            lock = new Lock(hardwareMap, telemetry);
-            lockAttached = true;
+            lock = new Lock(protect, hardwareMap, telemetry);
+            lockAttached = lock.isAvailable();
         } catch (Exception e) {
             telemetry.log().add("Lock hardware not found — climbing lock disabled");
         }
         try {
-            wink = new Wink(hardwareMap, telemetry);
-            eyeWinked = true;
+            wink = new Wink(protect, hardwareMap, telemetry);
+            winkAttached = wink.isAvailable();
         } catch (Exception e) {
             telemetry.log().add("Winking eye not found — Wink disabled");
         }
         try {
-            wiggle = new Wiggle(hardwareMap, telemetry);
-            wiggled = false;
+            wiggle = new Wiggle(protect, hardwareMap, telemetry);
+            wiggleAttached = wiggle.isAvailable();
         } catch (Exception e) {
             telemetry.log().add("Wiggling not found — Wiggle disabled");
         }
 
         try {
-            buddyClimb = new BuddyClimb(hardwareMap, telemetry);
-            buddiesClimbed = true;
+            buddyClimb = new BuddyClimb(protect, hardwareMap, telemetry);
+            buddyClimbAttached = buddyClimb.isAvailable();
         } catch (Exception e) {
             telemetry.log().add("Helper servo not found — Buddy climb disabled");
         }
-
-        try {
-            buddyClimb = new BuddyClimb(hardwareMap, telemetry);
-            buddyClimbed = true;
-        } catch (Exception e) {
-            telemetry.log().add("Servo for helping not found — Buddy climb disabled");
-        }
         try {
             collectBalls = new CollectBalls(protect, hardwareMap, telemetry);
-            collectBallsAttached = true;
+            collectBallsAttached = collectBalls.isAvailable();
         } catch (Exception e) {
             telemetry.log().add("Collecting balls hardware not found — collecting balls disabled");
         }
 
         try {
             feedBalls = new FeedBalls(protect, hardwareMap, telemetry);
-            feedBallsAttached = true;
+            feedBallsAttached = feedBalls.isAvailable();
         } catch (Exception e) {
             telemetry.log().add("Feeder hardware not found — feeding balls disabled");
         }
 
         try {
             throwBalls= new ThrowBalls(protect, hardwareMap, telemetry);
-            spinWheelAttached = true;
+            spinWheelAttached = throwBalls.isAvailable();
         } catch (Exception e) {
             telemetry.log().add("SpinWheel hardware not found — spinning wheel disabled");
         }
 
-        myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+        // This one used to be bare: no Control Hub entry in the config and the
+        // whole op-mode died right here, before the loop ever started.
+        myControlHubVoltageSensor = Protect.map(protect, telemetry, "Control Hub",
+                () -> hardwareMap.get(VoltageSensor.class, "Control Hub"));
 
          /* ======================
            Controls: Presses wrappers and toggles
@@ -239,6 +241,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
         // Wiggle
         Presses gamepad2_options = new Presses();
+
+        // Shot stats detail: hold options + circle on gamepad 2 to toggle
+        Presses gamepad2_shotStats = new Presses();
 
         telemetry.update();
         waitForStart(); //everything has been initialized, waiting for the start button
@@ -309,15 +314,17 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             // WINKING
             boolean eyesWinked = gamepad2_share.toggle(gamepad2.share);
-            if (eyesWinked && !eyeWinked) {
-                wink.setPos(1);
-                eyeWinked = true;
-            } else if (!eyesWinked && eyeWinked) {
-                wink.setPos(0);
-                eyeWinked = false;
+            if (winkAttached) {
+                if (eyesWinked && !eyeWinked) {
+                    wink.setPos(1);
+                    eyeWinked = true;
+                } else if (!eyesWinked && eyeWinked) {
+                    wink.setPos(0);
+                    eyeWinked = false;
+                }
             }
             // WIGGLING
-            boolean wiggleds = gamepad2_touchpad.toggle(gamepad2.touchpad);
+            boolean wiggleds = wiggleAttached && gamepad2_touchpad.toggle(gamepad2.touchpad);
             if (wiggleds && !wiggled) {
                 wiggled = true;
                 wiggle.setPos(1);
@@ -337,12 +344,14 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             // BUDDY CLIMBING
             boolean buddyClimbed = gamepad1_dpad_left.toggle(gamepad1.dpad_left);
-            if (buddiesClimbed && !buddyClimbed) {
-                buddyClimb.setPos(0);
-                buddyClimbed = true;
-            } else if (!buddiesClimbed && buddyClimbed) {
-                buddyClimb.setPos(1);
-                buddyClimbed = false;
+            if (buddyClimbAttached) {
+                if (buddiesClimbed && !buddyClimbed) {
+                    buddyClimb.setPos(0);
+                    buddyClimbed = true;
+                } else if (!buddiesClimbed && buddyClimbed) {
+                    buddyClimb.setPos(1);
+                    buddyClimbed = false;
+                }
             }
 
 
@@ -370,8 +379,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.addData("isFeeding", isFeeding);
             telemetry.addData("isClearing", isClearing);
             if (feedBallsAttached) {
-                // Only feed if the flywheel is at the right speed
-                boolean atSpeed = throwBalls.isAtSpeed();
+                // Only feed if the flywheel is at the right speed. If the launcher
+                // never mapped, throwBalls is null - treat that as "not at speed"
+                // instead of dereferencing it and killing the op-mode.
+                boolean atSpeed = spinWheelAttached && throwBalls.isAtSpeed();
                 if (isFeeding && atSpeed) {
                     feedBalls.feed(true);
                     if (isClearing) {
@@ -407,6 +418,13 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 if (currentThrowSpeed > 1700) {
                     gamepad2.rumble(250);
                 }
+
+                // Watch the flywheel speed for the dip each ball causes.
+                if (isSpinningWheel) {
+                    throwBalls.updateShotTracking(currentThrowSpeed);
+                } else {
+                    throwBalls.resetShotTracking();
+                }
             }
 
 
@@ -425,21 +443,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.addData("ViskeKeerutikiirus", spinWheelAttached ? currentThrowSpeed : "N/A");
             telemetry.addData("Field Centric", fieldCentric);
             telemetry.addData("Heading (Deg)", Math.toDegrees(imuAngle));
-            if (isSpinningWheel) {
-                double lowestSpeed = Double.MAX_VALUE;
-                if (!recordingLowest && currentThrowSpeed > 2675) {
-                    recordingLowest = true;
-                    lowestSpeed = currentThrowSpeed;
-                }
-                if (recordingLowest) {
-                    if (currentThrowSpeed < lowestSpeed) {
-                        lowestSpeed = currentThrowSpeed;
-                    }
-                    telemetry.addData("Lowest Speed", lowestSpeed);
-                }
-            } else {
-                recordingLowest = false;
-            }
             /* ======================
                Drive gears: read bumpers to increment/decrement gear
                - clamps gear between 1 and 3 and maps to DriveGear enum
@@ -452,6 +455,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 gear += 1;
             }
             telemetry.addData("Gear", gear);
+            if (driveBaseAttached && !driveBase.allEncodersOk()) {
+                telemetry.addData("!! Encoder dead", driveBase.getDeadEncoders());
+            }
 
             if (gear == 1) {
                 currentDriveGear = DriveGear.LOW;
@@ -471,8 +477,16 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 }
             }
 
-            double presentVoltage;
-            presentVoltage = myControlHubVoltageSensor.getVoltage();
+            // 12 V on failure means the compensation factor comes out as 1, i.e.
+            // drive exactly as commanded rather than not at all.
+            double presentVoltage = 12.0;
+            if (myControlHubVoltageSensor != null) {
+                presentVoltage = Protect.getDouble(protect, telemetry, "Control Hub voltage",
+                        () -> myControlHubVoltageSensor.getVoltage(), 12.0);
+            }
+            if (presentVoltage <= 0) {
+                presentVoltage = 12.0;
+            }
 
             telemetry.addData("drive",drive);
             telemetry.addData("strafe", strafe);
@@ -481,6 +495,38 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
                 double compensation = 12.0 / presentVoltage;
                 driveBase.move(imuAngle, drive * compensation, strafe * compensation, turn * compensation, fieldCentric, currentDriveGear);
+            }
+
+            /* ======================
+               Shot measurement telemetry
+               - one line normally: how much RPM the last ball cost
+               - options + circle on gamepad 2 toggles the full numbers
+               ====================== */
+            boolean showShotDetail = gamepad2_shotStats.toggle(gamepad2.options && gamepad2.circle);
+            if (spinWheelAttached && isSpinningWheel) {
+                if (ThrowBalls.isCalibrated()) {
+                    telemetry.addData("Balls", "%d  (drop %.0f)",
+                            throwBalls.getBallCount(), throwBalls.getLastDropRpm());
+                } else {
+                    telemetry.addData("RPM drop", "%.0f", throwBalls.getLastDropRpm());
+                }
+
+                if (showShotDetail) {
+                    telemetry.addData("Shots", throwBalls.getShotCount());
+                    if (ThrowBalls.isCalibrated()) {
+                        telemetry.addData("Balls last shot", throwBalls.getLastShotBalls());
+                    }
+                    telemetry.addData("Last shot", "%.0f -> %.0f  (%.0f ms)",
+                            throwBalls.getLastBaselineRpm(),
+                            throwBalls.getLastLowestRpm(),
+                            throwBalls.getLastDipMs());
+                    telemetry.addData("Drops min/avg/max", "%.0f / %.0f / %.0f",
+                            throwBalls.getMinDropRpm(),
+                            throwBalls.getAverageDropRpm(),
+                            throwBalls.getMaxDropRpm());
+                    telemetry.addData("Recent drops", throwBalls.getRecentDropsText());
+                    telemetry.addData("Steady RPM", "%.0f", throwBalls.getBaselineRpm());
+                }
             }
             telemetry.update();
         } // This brace correctly closes the `while (opModeIsActive())` loop.

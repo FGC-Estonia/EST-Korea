@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
+import org.firstinspires.ftc.teamcode.common.util.Protect;
 
 /**
  * Module for controlling the robot's pole climbing mechanism.
@@ -28,10 +29,18 @@ public class ClimbPole {
     }
 
     private void mapMotors() {
-        climbMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.ROPE_MOTOR);
-        climbMotor.setDirection(DcMotor.Direction.REVERSE);
-        climbMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        climbMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        climbMotor = Protect.map(protect, telemetry, HardwareConstants.CLIMB_MOTOR, () -> {
+            DcMotorEx m = hardwareMap.get(DcMotorEx.class, HardwareConstants.CLIMB_MOTOR);
+            m.setDirection(DcMotor.Direction.REVERSE);
+            m.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            return m;
+        });
+    }
+
+    /** True if the climb motor is actually in the configuration. */
+    public boolean isAvailable() {
+        return climbMotor != null;
     }
 
     /**
@@ -55,7 +64,12 @@ public class ClimbPole {
             power = 0;
         }
 
-        climbMotor.setPower(power);
+        if (climbMotor == null) {
+            return;
+        }
+        final double motorPower = power;
+        Protect.run(protect, telemetry, "ClimbPole.ropeClimbing",
+                () -> climbMotor.setPower(motorPower));
     }
 
 }
