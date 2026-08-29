@@ -43,6 +43,7 @@ import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
 import org.firstinspires.ftc.teamcode.mainModules.FeedBalls;
 import org.firstinspires.ftc.teamcode.mainModules.Lock;
 import org.firstinspires.ftc.teamcode.mainModules.Wink;
+import org.firstinspires.ftc.teamcode.mainModules.ExpandStorage;
 import org.firstinspires.ftc.teamcode.mainModules.Wiggle;
 import org.firstinspires.ftc.teamcode.mainModules.BuddyClimb;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
@@ -66,6 +67,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     // --- Subsystem instances for robot modules ---
     private Lock lock = null;      // Climbing lock mechanism
     private Wink wink = null;
+    private ExpandStorage expandStorage = null;
     private Wiggle wiggle = null;
     private BuddyClimb buddyClimb = null;
     private ClimbPole climbRope = null;      // Pole climbing mechanism
@@ -85,6 +87,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private boolean lockAttached = false;
     private boolean buddyClimbed = true;
     private boolean eyeWinked = false;
+    private boolean expandStoraged = false;
     private boolean wiggled = false;
     private boolean buddiesClimbed = false;
     private boolean collectBallsAttached = false;
@@ -161,6 +164,12 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.log().add("Winking eye not found — Wink disabled");
         }
         try {
+            expandStorage = new ExpandStorage(hardwareMap, telemetry);
+            expandStoraged = true;
+        } catch (Exception e) {
+            telemetry.log().add("Expanding not found — Expanding disabled");
+        }
+        try {
             wiggle = new Wiggle(hardwareMap, telemetry);
             wiggled = false;
         } catch (Exception e) {
@@ -228,6 +237,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         Presses gamepad2_share = new Presses();
 
         Presses gamepad2_dpad_left = new Presses();
+
+        Presses gamepad2_dpad_right = new Presses();
 
         Presses gamepad2_touchpad = new Presses();
         // Controls for Lock
@@ -315,6 +326,15 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             } else if (!eyesWinked && eyeWinked) {
                 wink.setPos(0);
                 eyeWinked = false;
+            }
+            // EXPANDING STORAGE
+            boolean storageExpansion = gamepad2_dpad_right.toggle(gamepad2.dpad_right);
+            if (storageExpansion && !expandStoraged) {
+                expandStorage.setPos(1);
+                expandStoraged = true;
+            } else if (!storageExpansion && expandStoraged) {
+                expandStorage.setPos(0);
+                expandStoraged = false;
             }
             // WIGGLING
             boolean wiggleds = gamepad2_touchpad.toggle(gamepad2.touchpad);
