@@ -19,7 +19,6 @@ public class HardwareConstants {
     public static final String WINK_SERVO_MOTOR = "Servo_Port_4_CH";
     public static final String BUDDY_SERVO_MOTOR = "Servo_Port_5_CH";
     public static final String WIGGLE_SERVO_MOTOR = "Servo_Port_0_EH";
-    public static final String WALL_SERVO_MOTOR = "Servo_Port_3_EH";
-    public static final String EXPAND_STORAGE_SERVO_MOTOR = "Servo_Port_4_CH";
+    public static final String EXPAND_STORAGE_SERVO_MOTOR = "Servo_Port_3_EH";
 
 }
