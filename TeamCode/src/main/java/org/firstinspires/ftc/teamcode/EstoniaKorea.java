@@ -33,7 +33,6 @@ d!   'W M@@@A  ][  M@@@A W`   !b
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.common.util.ImuManager;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.teamcode.mainModules.ClimbPole;
@@ -42,13 +41,11 @@ import org.firstinspires.ftc.teamcode.common.util.Presses;
 import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
 import org.firstinspires.ftc.teamcode.mainModules.FeedBalls;
 import org.firstinspires.ftc.teamcode.mainModules.Lock;
-import org.firstinspires.ftc.teamcode.mainModules.Wink;
 import org.firstinspires.ftc.teamcode.mainModules.ExpandStorage;
 import org.firstinspires.ftc.teamcode.mainModules.Wiggle;
 import org.firstinspires.ftc.teamcode.mainModules.BuddyClimb;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.teamcode.mainModules.Alignment;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -66,7 +63,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
     // --- Subsystem instances for robot modules ---
     private Lock lock = null;      // Climbing lock mechanism
-    private Wink wink = null;
     private ExpandStorage expandStorage = null;
     private Wiggle wiggle = null;
     private BuddyClimb buddyClimb = null;
@@ -86,7 +82,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private boolean ropeClimbingAttached = false;
     private boolean lockAttached = false;
     private boolean buddyClimbed = true;
-    private boolean eyeWinked = false;
     private boolean expandStoraged = false;
     private boolean wiggled = false;
     private boolean buddiesClimbed = false;
@@ -156,12 +151,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             lockAttached = true;
         } catch (Exception e) {
             telemetry.log().add("Lock hardware not found — climbing lock disabled");
-        }
-        try {
-            wink = new Wink(hardwareMap, telemetry);
-            eyeWinked = true;
-        } catch (Exception e) {
-            telemetry.log().add("Winking eye not found — Wink disabled");
         }
         try {
             expandStorage = new ExpandStorage(hardwareMap, telemetry);
@@ -318,15 +307,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 climbRope.ropeClimbing(climbingDirection, -gamepad2.right_stick_y);
             }
 
-            // WINKING
-            boolean eyesWinked = gamepad2_share.toggle(gamepad2.share);
-            if (eyesWinked && !eyeWinked) {
-                wink.setPos(1);
-                eyeWinked = true;
-            } else if (!eyesWinked && eyeWinked) {
-                wink.setPos(0);
-                eyeWinked = false;
-            }
             // EXPANDING STORAGE
             boolean storageExpansion = gamepad2_dpad_right.toggle(gamepad2.dpad_right);
             if (storageExpansion && !expandStoraged) {
