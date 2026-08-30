@@ -11,7 +11,7 @@ public class HardwareConstants {
     public static final String CLIMB_MOTOR = "Motor_Port_1_EH";
     // Other gadgets' motors
     public static final String THROW_MOTOR = "Motor_Port_2_EH";
-    public static final String BALL_COLLECTOR_MOTOR = "Motor_Port_2_CH";
+    public static final String BALL_COLLECTOR_MOTOR = "Motor_Port_0_CH";
     public static final String FEEDER_MOTOR = "Motor_Port_0_EH";
     public static final String REACHL_SERVO_MOTOR = "Servo_Port_0_CH";
     public static final String REACHR_SERVO_MOTOR = "Servo_Port_0_EH";
