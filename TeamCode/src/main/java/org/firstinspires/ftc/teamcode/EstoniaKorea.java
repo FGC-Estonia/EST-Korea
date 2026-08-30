@@ -75,6 +75,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private VoltageSensor myControlHubVoltageSensor;
     private Alignment alignment;
     private ElapsedTime wiggleTimer = new ElapsedTime();
+    private ElapsedTime telemetryTimer = new ElapsedTime();
+    private ElapsedTime voltageTimer = new ElapsedTime();
 
 
     private boolean alignmentAttached = false;
@@ -103,6 +105,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private static final double WHEEL_DIAMETER = 0.09; // meters, replace with your wheel diameter
     private static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER; // robot geometry for kinematics: half distances (meters) - replace with your robot measurements
     boolean fieldCentric = false;
+    double presentVoltage = 12.0;
 
     int gear = 1;
 
@@ -471,18 +474,22 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 }
             }
 
-            double presentVoltage;
-            presentVoltage = myControlHubVoltageSensor.getVoltage();
+            if (voltageTimer.milliseconds() > 250) {
+                presentVoltage = myControlHubVoltageSensor.getVoltage();
+                voltageTimer.reset();
+            }
 
             telemetry.addData("drive",drive);
             telemetry.addData("strafe", strafe);
             telemetry.addData("turn", turn);
             if (driveBaseAttached) {
-
                 double compensation = 12.0 / presentVoltage;
                 driveBase.move(imuAngle, drive * compensation, strafe * compensation, turn * compensation, fieldCentric, currentDriveGear);
             }
-            telemetry.update();
+            if (telemetryTimer.milliseconds() > 50) {
+                telemetry.update();
+                telemetryTimer.reset();
+            }
         } // This brace correctly closes the `while (opModeIsActive())` loop.
     } // This brace correctly closes the `runOpMode()` method.
 
