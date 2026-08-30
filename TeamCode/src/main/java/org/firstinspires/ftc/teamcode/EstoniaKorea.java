@@ -257,7 +257,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             }
             
             double currentDistance = 1000.0;
-            if (alignmentAttached) {
+            if (alignmentAttached && gamepad1.right_trigger > 0.2) {
                 currentDistance = alignment.getDistance();
             }
 
