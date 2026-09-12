@@ -42,7 +42,6 @@ import org.firstinspires.ftc.teamcode.mainModules.CollectBalls;
 import org.firstinspires.ftc.teamcode.mainModules.FeedBalls;
 import org.firstinspires.ftc.teamcode.mainModules.Lock;
 import org.firstinspires.ftc.teamcode.mainModules.ExpandStorage;
-import org.firstinspires.ftc.teamcode.mainModules.Wiggle;
 import org.firstinspires.ftc.teamcode.mainModules.BuddyClimb;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
 
@@ -64,7 +63,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     // --- Subsystem instances for robot modules ---
     private Lock lock = null;      // Climbing lock mechanism
     private ExpandStorage expandStorage = null;
-    private Wiggle wiggle = null;
     private BuddyClimb buddyClimb = null;
     private ClimbPole climbRope = null;      // Pole climbing mechanism
     private CollectBalls collectBalls = null; // Ball intake mechanism
@@ -74,7 +72,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private ImuManager imuManager;
     private VoltageSensor myControlHubVoltageSensor;
     private Alignment alignment;
-    private ElapsedTime wiggleTimer = new ElapsedTime();
     private ElapsedTime telemetryTimer = new ElapsedTime();
     private ElapsedTime voltageTimer = new ElapsedTime();
 
@@ -83,9 +80,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     // Attachment flags
     private boolean ropeClimbingAttached = false;
     private boolean lockAttached = false;
-    private boolean buddyClimbed = true;
+    private boolean buddyClimbed = false;
     private boolean expandStoraged = false;
-    private boolean wiggled = false;
     private boolean buddiesClimbed = false;
     private boolean collectBallsAttached = false;
     private boolean feedBallsAttached = false;
@@ -93,7 +89,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private boolean spinWheelAttached = false;
     private boolean driveBaseAttached = false;
     private boolean imuManagerAttached = false;
-    private int wigglePos = 0;
 
     int[] lastDriveMotorPositions = {0, 0, 0, 0};
     private boolean isSpinningWheel = false;
@@ -161,26 +156,14 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         } catch (Exception e) {
             telemetry.log().add("Expanding not found — Expanding disabled");
         }
-        try {
-            wiggle = new Wiggle(hardwareMap, telemetry);
-            wiggled = false;
-        } catch (Exception e) {
-            telemetry.log().add("Wiggling not found — Wiggle disabled");
-        }
 
         try {
             buddyClimb = new BuddyClimb(hardwareMap, telemetry);
             buddiesClimbed = true;
         } catch (Exception e) {
-            telemetry.log().add("Helper servo not found — Buddy climb disabled");
+            telemetry.log().add("Buddy servo not found — Buddy climb disabled");
         }
-
-        try {
-            buddyClimb = new BuddyClimb(hardwareMap, telemetry);
-            buddyClimbed = true;
-        } catch (Exception e) {
-            telemetry.log().add("Servo for helping not found — Buddy climb disabled");
-        }
+        
         try {
             collectBalls = new CollectBalls(protect, hardwareMap, telemetry);
             collectBallsAttached = true;
@@ -240,7 +223,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         Presses gamepad1_share = new Presses();
         Presses gamepad1_options = new Presses();
 
-        // Wiggle
+        // W
         Presses gamepad2_options = new Presses();
 
         telemetry.update();
@@ -318,24 +301,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             } else if (!storageExpansion && expandStoraged) {
                 expandStorage.setPos(0);
                 expandStoraged = false;
-            }
-            // WIGGLING
-            boolean wiggleds = gamepad2_touchpad.toggle(gamepad2.touchpad);
-            if (wiggleds && !wiggled) {
-                wiggled = true;
-                wiggle.setPos(1);
-                wigglePos = 1;
-                wiggleTimer.reset();
-            } else if (!wiggleds && wiggled) {
-                wiggled = false;
-                wiggle.setPos(0);
-            }
-            if (wiggled) {
-                if (wiggleTimer.milliseconds() > 690) {
-                    wigglePos = (wigglePos == 0) ? 1 : 0;
-                    wiggle.setPos(wigglePos);
-                    wiggleTimer.reset();
-                }
             }
 
             // BUDDY CLIMBING

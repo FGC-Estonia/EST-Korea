@@ -8,12 +8,15 @@ import org.firstinspires.ftc.teamcode.common.util.HardwareConstants;
 
 public class BuddyClimb {
     private Servo buddyServo;
+    private Servo buddyServo2;
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
 
     private void mapServo() {
         buddyServo = hardwareMap.get(Servo.class, HardwareConstants.BUDDY_SERVO_MOTOR);
         buddyServo.setDirection(Servo.Direction.FORWARD);
+        buddyServo2 = hardwareMap.get(Servo.class, HardwareConstants.BUDDY_SERVO_TWO_MOTOR);
+        buddyServo2.setDirection(Servo.Direction.FORWARD);
     }
 
     public BuddyClimb(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -22,7 +25,7 @@ public class BuddyClimb {
         mapServo();
     }
     public void setPos(double pos) {
-            buddyServo.setPosition(pos);
-        }
+        buddyServo.setPosition(pos);
+        buddyServo2.setPosition(pos);
     }
-
+}
