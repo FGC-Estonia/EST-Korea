@@ -14,8 +14,8 @@ public class ThrowBalls {
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
     private final boolean protect;
-    private static final double REQUIRED_SPEED_RPM = 2675;
-    private static final double WHEEL_VELOCITY_RPM = 2785;
+    private static final double REQUIRED_SPEED_RPM = 3600;
+    private static final double WHEEL_VELOCITY_RPM = 4000;
 
     private static final double REQUIRED_SPEED = REQUIRED_SPEED_RPM/60*28;
     private static final double WHEEL_VELOCITY = WHEEL_VELOCITY_RPM/60*28;
