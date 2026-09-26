@@ -10,10 +10,15 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 import java.util.Locale;
+import static org.firstinspires.ftc.teamcode.mainModules.MoveRobot.DriveGear;
 @TeleOp(name = "AprilTag", group = "Concept")
 public class AprilTag extends LinearOpMode {
+    private MoveRobot driveBase;
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
+    private static final double TARGET_DISTANCE = 6.0; // How far to stop (in inches)
+    // private static final int TARGET_ID = 103; // future thing idk yet
+
 
     /**
      * The variable to store our instance of the AprilTag processor.
@@ -30,6 +35,9 @@ public class AprilTag extends LinearOpMode {
 
         initAprilTag();
 
+        initDriveBase();
+
+
         // Wait for the DS start button to be touched.
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch START to start OpMode");
@@ -39,6 +47,11 @@ public class AprilTag extends LinearOpMode {
         while (opModeIsActive()) {
 
             telemetryAprilTag();
+            if (gamepad1.right_bumper) {
+                driveToAprilTag();
+            } else {
+                driveManually();
+            }
 
             // Push telemetry to the Driver Station.
             telemetry.update();
@@ -78,6 +91,13 @@ public class AprilTag extends LinearOpMode {
 
     }   // end method initAprilTag()
 
+    private void initDriveBase() {
+        driveBase = new MoveRobot(true, hardwareMap, telemetry, true);
+    }
+
+    //driveBase.move(imuAngle, drive, strafe, turn, fieldCentric, currentDriveGear);
+
+
     /**
      * Add telemetry about AprilTag detections.
      */
@@ -97,4 +117,30 @@ public class AprilTag extends LinearOpMode {
             }
         }   // end for() loop
     }   // end method telemetryAprilTag()
+    private void driveManually() {
+        double drive = -gamepad1.left_stick_y;
+        double strafe = gamepad1.left_stick_x;
+        double turn = gamepad1.right_stick_x;
+
+        driveBase.move(0, drive, strafe, turn, false, DriveGear.HIGH);
+    }
+    private void driveToAprilTag() {
+        List<AprilTagDetection> detections = aprilTag.getDetections();
+
+        double drive = 0;
+        double turn = 0;
+
+        if (!detections.isEmpty()) {
+            AprilTagDetection detection = detections.get(0); // just use the first tag seen
+
+            if (detection.metadata != null) {
+                double rangeError = detection.ftcPose.range - TARGET_DISTANCE;
+                turn = 0.02 * detection.ftcPose.bearing;
+                drive = 0.02 * rangeError;
+                drive = Math.max(-1.0, Math.min(1.0, drive));
+                turn = Math.max(-1.0, Math.min(1.0, turn));
+            }
+        }
+        driveBase.move(0, drive, 0, turn, false, DriveGear.HIGH);
+    }
 }   // end class

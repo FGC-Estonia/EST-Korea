@@ -14,9 +14,9 @@ public class BuddyClimb {
 
     private void mapServo() {
         buddyServo = hardwareMap.get(Servo.class, HardwareConstants.BUDDY_SERVO_MOTOR);
-        buddyServo.setDirection(Servo.Direction.FORWARD);
+        buddyServo.setDirection(Servo.Direction.REVERSE);
         buddyServo2 = hardwareMap.get(Servo.class, HardwareConstants.BUDDY_SERVO_TWO_MOTOR);
-        buddyServo2.setDirection(Servo.Direction.FORWARD);
+        buddyServo2.setDirection(Servo.Direction.REVERSE);
     }
 
     public BuddyClimb(HardwareMap hardwareMap, Telemetry telemetry) {
