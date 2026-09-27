@@ -270,7 +270,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             double strafe = gamepad1.left_stick_x;
             double turn = gamepad1.right_stick_x;
 
-            // AprilTag Override
+            // AprilTag
             if (gamepad1.dpad_right && aprilTagAttached) {
                 double[] chase = aprilTag.getCommand();
                 if (chase != null) {
@@ -363,12 +363,16 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // Toggles the feeder mechanism to move balls to the launcher
             boolean isFeeding = gamepad2_cross.toggle(gamepad2.cross);
             boolean isClearing = gamepad2_triangle.toggle(gamepad2.triangle);
+            boolean overrideSpeed = gamepad2_dpad_left.toggle(gamepad2.dpad_left);
+            if (overrideSpeed) {
+                gamepad2.rumble(50);
+            }
             telemetry.addData("isFeeding", isFeeding);
             telemetry.addData("isClearing", isClearing);
             if (feedBallsAttached) {
                 // Only feed if the flywheel is at the right speed
                 boolean atSpeed = throwBalls.isAtSpeed();
-                if (isFeeding && atSpeed) {
+                if (isFeeding && (atSpeed || overrideSpeed)) {
                     feedBalls.feed(true);
                     if (isClearing) {
                         gamepad2_cross.setToggleFalse();
@@ -377,9 +381,9 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                     }
                 } else if (isClearing){
                     feedBalls.clear(true);
-                    if (isFeeding) {
-                        feedBalls.clear(false);
+                    if (isFeeding && (atSpeed || overrideSpeed)) {
                         gamepad2_triangle.setToggleFalse();
+                        feedBalls.clear(false);
                         feedBalls.feed(true);
                     }
                 } else {
