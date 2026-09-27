@@ -44,6 +44,7 @@ import org.firstinspires.ftc.teamcode.mainModules.Lock;
 import org.firstinspires.ftc.teamcode.mainModules.ExpandStorage;
 import org.firstinspires.ftc.teamcode.mainModules.BuddyClimb;
 import org.firstinspires.ftc.teamcode.mainModules.ThrowBalls;
+import org.firstinspires.ftc.teamcode.mainModules.AprilTag;
 
 import org.firstinspires.ftc.teamcode.mainModules.Alignment;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -72,6 +73,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private ImuManager imuManager;
     private VoltageSensor myControlHubVoltageSensor;
     private Alignment alignment;
+    private AprilTag aprilTag;   // AprilTag detection
     private ElapsedTime telemetryTimer = new ElapsedTime();
     private ElapsedTime voltageTimer = new ElapsedTime();
 
@@ -89,6 +91,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
     private boolean spinWheelAttached = false;
     private boolean driveBaseAttached = false;
     private boolean imuManagerAttached = false;
+    private boolean aprilTagAttached = false;
 
     int[] lastDriveMotorPositions = {0, 0, 0, 0};
     private boolean isSpinningWheel = false;
@@ -133,6 +136,14 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             imuManagerAttached = true;
         } catch (Exception e) {
             telemetry.log().add("IMU hardware not found — field centric disabled");
+        }
+
+        // --- AprilTag chase init ---
+        try {
+            aprilTag = new AprilTag(hardwareMap, telemetry);
+            aprilTagAttached = true;
+        } catch (Exception e) {
+            telemetry.log().add("AprilTag hardware not found — AprilTag disabled");
         }
 
         // --- Try to attach optional modules (safe to fail) ---
@@ -192,6 +203,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
            ====================== */
 
         Presses gamepad1_dpad_left = new Presses();
+        Presses gamepad1_dpad_right = new Presses();
 
         Presses.ToggleGroup feedClearToggle = new Presses.ToggleGroup();
         Presses gamepad2_dpad_down = new Presses(feedClearToggle);
@@ -205,7 +217,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         // > gamepad2.right_bumper  - climb down
         // > gamepad2.left_stick_y  - manual joystick control (when abs > 0.05)
 
-        
+
         // Controls for drive gear
         Presses gamepad1_right_bumper = new Presses();
         Presses gamepad1_left_bumper = new Presses();
@@ -243,7 +255,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles angles = imuManager.getAngles();
                 imuAngle = angles.getYaw(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS);
             }
-            
+
             double currentDistance = 1000.0;
             if (alignmentAttached && gamepad1.right_trigger > 0.2) {
                 currentDistance = alignment.getDistance();
@@ -257,6 +269,20 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             }
             double strafe = gamepad1.left_stick_x;
             double turn = gamepad1.right_stick_x;
+
+            // AprilTag Override
+            if (gamepad1.dpad_right && aprilTagAttached) {
+                double[] chase = aprilTag.getCommand();
+                if (chase != null) {
+                    drive = chase[0];
+                    turn = chase[1];
+                    strafe = 0;
+                }
+            }
+
+            if (aprilTagAttached) {
+                aprilTag.sendTelemetry();
+            }
 
             // FieldCentric rumble
             if (gamepad1_share.pressed(gamepad1.share)) {
@@ -308,10 +334,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // BUDDY CLIMBING
             boolean buddyClimbed = gamepad1_dpad_left.toggle(gamepad1.dpad_left);
             if (buddiesClimbed && !buddyClimbed) {
-                buddyClimb.setPos(0);
+                buddyClimb.setPos(1);
                 buddyClimbed = true;
             } else if (!buddiesClimbed && buddyClimbed) {
-                buddyClimb.setPos(1);
+                buddyClimb.setPos(0);
                 buddyClimbed = false;
             }
 
@@ -458,6 +484,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 telemetryTimer.reset();
             }
         } // This brace correctly closes the `while (opModeIsActive())` loop.
+
+        if (aprilTagAttached) {
+            aprilTag.close();
+        }
     } // This brace correctly closes the `runOpMode()` method.
 
     /* ======================
