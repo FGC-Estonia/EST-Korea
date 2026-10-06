@@ -217,7 +217,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         // > gamepad2.right_bumper  - climb down
         // > gamepad2.left_stick_y  - manual joystick control (when abs > 0.05)
 
-
+        Presses gamepad2_right_bumper = new Presses();
         // Controls for drive gear
         Presses gamepad1_right_bumper = new Presses();
         Presses gamepad1_left_bumper = new Presses();
@@ -239,6 +239,8 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
         // W
         Presses gamepad2_options = new Presses();
+
+        Presses gamepad2_right_trigger = new Presses();
 
         telemetry.update();
         waitForStart(); //everything has been initialized, waiting for the start button
@@ -305,10 +307,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 climbingDirection = 0;
             } else if (holdingOnRope) {
                 climbingDirection = 1;  // hold position
-            } else if (gamepad2.left_bumper) {
-                climbingDirection = 2;  // climb up
-            } else if (gamepad2.right_bumper) {
-                climbingDirection = -1; // climb down
             } else if (Math.abs(gamepad2.left_stick_y) > 0.05) {
                 climbingDirection = 3;
             } else {
@@ -334,10 +332,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             // BUDDY CLIMBING
             boolean buddyClimbed = gamepad1_dpad_left.toggle(gamepad1.dpad_left);
             if (buddiesClimbed && !buddyClimbed) {
-                buddyClimb.setPos(1);
+                buddyClimb.setPos(0);
                 buddyClimbed = true;
             } else if (!buddiesClimbed && buddyClimbed) {
-                buddyClimb.setPos(0);
+                buddyClimb.setPos(1);
                 buddyClimbed = false;
             }
 
@@ -393,7 +391,7 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             // --- THROW BALLS LOGIC ---
             // Toggles the spinning launcher wheel
-            isSpinningWheel = gamepad2_circle.toggle(gamepad2.circle);
+            isSpinningWheel = gamepad2_right_bumper.toggle(gamepad2.right_bumper);
             telemetry.addData("isSpinningWheel", isSpinningWheel);
             double currentThrowSpeed = 0;
             if (spinWheelAttached) {
