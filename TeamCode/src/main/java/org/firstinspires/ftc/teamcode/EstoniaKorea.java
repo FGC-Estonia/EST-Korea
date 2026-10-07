@@ -79,12 +79,11 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
 
     private boolean alignmentAttached = false;
-    // Attachment flags
+    // Attachment flag
     private boolean ropeClimbingAttached = false;
     private boolean lockAttached = false;
-    private boolean buddyClimbed = false;
-    private boolean expandStoraged = false;
-    private boolean buddiesClimbed = false;
+    private boolean extraStorageAttached = false;
+    private boolean buddyClimbAttached = false;
     private boolean collectBallsAttached = false;
     private boolean feedBallsAttached = false;
     private boolean shootBallsAttached = false;
@@ -163,14 +162,14 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
         }
         try {
             expandStorage = new ExpandStorage(hardwareMap, telemetry);
-            expandStoraged = true;
+            extraStorageAttached = true;
         } catch (Exception e) {
             telemetry.log().add("Expanding not found — Expanding disabled");
         }
 
         try {
             buddyClimb = new BuddyClimb(hardwareMap, telemetry);
-            buddiesClimbed = true;
+            buddyClimbAttached = true;
         } catch (Exception e) {
             telemetry.log().add("Buddy servo not found — Buddy climb disabled");
         }
@@ -321,22 +320,18 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
             // EXPANDING STORAGE
             boolean storageExpansion = gamepad2_dpad_right.toggle(gamepad2.dpad_right);
-            if (storageExpansion && !expandStoraged) {
+            if (storageExpansion && extraStorageAttached) {
                 expandStorage.setPos(1);
-                expandStoraged = true;
-            } else if (!storageExpansion && expandStoraged) {
+            } else if (!storageExpansion && extraStorageAttached) {
                 expandStorage.setPos(0);
-                expandStoraged = false;
             }
 
             // BUDDY CLIMBING
             boolean buddyClimbed = gamepad1_dpad_left.toggle(gamepad1.dpad_left);
-            if (buddiesClimbed && !buddyClimbed) {
-                buddyClimb.setPos(0);
-                buddyClimbed = true;
-            } else if (!buddiesClimbed && buddyClimbed) {
+            if (buddyClimbAttached && !buddyClimbed) {
                 buddyClimb.setPos(1);
-                buddyClimbed = false;
+            } else if (buddyClimbAttached && buddyClimbed) {
+                buddyClimb.setPos(0);
             }
 
 
@@ -423,21 +418,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             telemetry.addData("ViskeKeerutikiirus", spinWheelAttached ? currentThrowSpeed : "N/A");
             telemetry.addData("Field Centric", fieldCentric);
             telemetry.addData("Heading (Deg)", Math.toDegrees(imuAngle));
-            if (isSpinningWheel) {
-                double lowestSpeed = Double.MAX_VALUE;
-                if (!recordingLowest && currentThrowSpeed > 2675) {
-                    recordingLowest = true;
-                    lowestSpeed = currentThrowSpeed;
-                }
-                if (recordingLowest) {
-                    if (currentThrowSpeed < lowestSpeed) {
-                        lowestSpeed = currentThrowSpeed;
-                    }
-                    telemetry.addData("Lowest Speed", lowestSpeed);
-                }
-            } else {
-                recordingLowest = false;
-            }
             /* ======================
                Drive gears: read bumpers to increment/decrement gear
                - clamps gear between 1 and 3 and maps to DriveGear enum
