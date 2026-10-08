@@ -94,7 +94,6 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
     int[] lastDriveMotorPositions = {0, 0, 0, 0};
     private boolean isSpinningWheel = false;
-    private boolean recordingLowest = false;
 
 
     // Robot geometry / encoder constants
@@ -241,6 +240,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
 
         Presses gamepad2_right_trigger = new Presses();
 
+        // HELP
+        boolean previousCross = false;
+        boolean previousTriangle = false;
+
         telemetry.update();
         waitForStart(); //everything has been initialized, waiting for the start button
         while (opModeIsActive()) { // main loop
@@ -360,6 +363,24 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
             if (overrideSpeed) {
                 gamepad2.rumble(50);
             }
+
+            // Newest press wins: if both toggles are on, keep the one that was just pressed
+            // and cancel the other (both the toggle inside Presses and the local copy)
+            boolean crossPressed = gamepad2.cross && !previousCross;
+            boolean trianglePressed = gamepad2.triangle && !previousTriangle;
+            previousCross = gamepad2.cross;
+            previousTriangle = gamepad2.triangle;
+
+            if (isFeeding && isClearing) {
+                if (crossPressed) {
+                    gamepad2_triangle.setToggleFalse();
+                    isClearing = false;
+                } else if (trianglePressed) {
+                    gamepad2_cross.setToggleFalse();
+                    isFeeding = false;
+                }
+            }
+
             telemetry.addData("isFeeding", isFeeding);
             telemetry.addData("isClearing", isClearing);
             if (feedBallsAttached) {
@@ -367,18 +388,10 @@ public class EstoniaKorea extends LinearOpMode { //file name is EstoniaKorea.jav
                 boolean atSpeed = throwBalls.isAtSpeed();
                 if (isFeeding && (atSpeed || overrideSpeed)) {
                     feedBalls.feed(true);
-                    if (isClearing) {
-                        gamepad2_cross.setToggleFalse();
-                        feedBalls.feed(false);
-                        feedBalls.clear(true);
-                    }
                 } else if (isClearing){
                     feedBalls.clear(true);
-                    if (isFeeding && (atSpeed || overrideSpeed)) {
-                        gamepad2_triangle.setToggleFalse();
-                        feedBalls.clear(false);
-                        feedBalls.feed(true);
-                    }
+                } else if (isFeeding){
+                    feedBalls.clear(true);
                 } else {
                     feedBalls.stop();
                 }
