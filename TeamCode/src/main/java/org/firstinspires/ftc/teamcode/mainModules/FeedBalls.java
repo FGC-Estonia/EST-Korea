@@ -50,10 +50,8 @@ public class FeedBalls {
     public void clear(boolean active) {
         if (active) {
             motor.setPower(-1.0);
-        } else {
-            motor.setPower(0);
+            }
         }
-    }
 
     public void stop() {
         motor.setPower(0);
